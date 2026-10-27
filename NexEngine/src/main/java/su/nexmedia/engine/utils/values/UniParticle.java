@@ -12,7 +12,8 @@ import su.nexmedia.engine.utils.StringUtil;
 public class UniParticle {
 
     private final Particle particle;
-    private final Object   data;
+
+    private final Object data;
 
     public UniParticle(@Nullable Particle particle, @Nullable Object data) {
         this.particle = particle;
@@ -68,31 +69,29 @@ public class UniParticle {
     public static UniParticle read(@NotNull JYML cfg, @NotNull String path) {
         String name = cfg.getString(path + ".Name", "");
         Particle particle = StringUtil.getEnum(name, Particle.class).orElse(null);
-        if (particle == null) return UniParticle.of(null);
-
+        if (particle == null) {
+            return UniParticle.of(null);
+        }
         Class<?> dataType = particle.getDataType();
         Object data = null;
         if (dataType == BlockData.class) {
             Material material = Material.getMaterial(cfg.getString(path + ".Material", ""));
             data = material != null ? material.createBlockData() : Material.STONE.createBlockData();
-        }
-        else if (dataType == Particle.DustOptions.class) {
+        } else if (dataType == Particle.DustOptions.class) {
             Color color = StringUtil.parseColor(cfg.getString(path + ".Color", ""));
             double size = cfg.getDouble(path + ".Size", 1D);
             data = new Particle.DustOptions(color, (float) size);
-        }
-        else if (dataType == Particle.DustTransition.class) {
+        } else if (dataType == Particle.DustTransition.class) {
             Color colorStart = StringUtil.parseColor(cfg.getString(path + ".Color_From", ""));
             Color colorEnd = StringUtil.parseColor(cfg.getString(path + ".Color_To", ""));
             double size = cfg.getDouble(path + ".Size", 1D);
             data = new Particle.DustTransition(colorStart, colorEnd, 1.0f);
-        }
-        else if (dataType == ItemStack.class) {
+        } else if (dataType == ItemStack.class) {
             ItemStack item = cfg.getItem(path + ".Item");
             data = item.getType().isAir() ? new ItemStack(Material.STONE) : item;
+        } else if (dataType != Void.class) {
+            return UniParticle.of(Particle.REDSTONE);
         }
-        else if (dataType != Void.class) return UniParticle.of(Particle.REDSTONE);
-
         return UniParticle.of(particle, data);
     }
 
@@ -103,24 +102,20 @@ public class UniParticle {
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
         cfg.set(path + ".Name", this.isEmpty() ? "null" : this.getParticle().name());
-
         Object data = this.getData();
         if (data instanceof BlockData blockData) {
             cfg.set(path + ".Material", blockData.getMaterial().name());
-        }
-        else if (data instanceof Particle.DustTransition dustTransition) {
+        } else if (data instanceof Particle.DustTransition dustTransition) {
             Color colorStart = dustTransition.getColor();
             Color colorEnd = dustTransition.getToColor();
             cfg.set(path + ".Color_From", colorStart.getRed() + "," + colorStart.getGreen() + "," + colorStart.getBlue());
             cfg.set(path + ".Color_To", colorEnd.getRed() + "," + colorEnd.getGreen() + "," + colorEnd.getBlue());
             cfg.set(path + ".Size", dustTransition.getSize());
-        }
-        else if (data instanceof Particle.DustOptions dustOptions) {
+        } else if (data instanceof Particle.DustOptions dustOptions) {
             Color color = dustOptions.getColor();
             cfg.set(path + ".Color", color.getRed() + "," + color.getGreen() + "," + color.getBlue());
             cfg.set(path + ".Size", dustOptions.getSize());
-        }
-        else if (data instanceof ItemStack item) {
+        } else if (data instanceof ItemStack item) {
             cfg.setItem(path + ".Item", item);
         }
     }
@@ -140,33 +135,34 @@ public class UniParticle {
 
     @NotNull
     public UniParticle parseData(@NotNull String from) {
-        if (this.isEmpty()) return this;
-
+        if (this.isEmpty()) {
+            return this;
+        }
         String[] split = from.split(" ");
         Class<?> dataType = this.getParticle().getDataType();
         Object data = null;
         if (dataType == BlockData.class) {
             Material material = Material.getMaterial(from.toUpperCase());
             data = material != null ? material.createBlockData() : Material.STONE.createBlockData();
-        }
-        else if (dataType == Particle.DustOptions.class) {
+        } else if (dataType == Particle.DustOptions.class) {
             Color color = StringUtil.parseColor(split[0]);
             double size = split.length >= 2 ? StringUtil.getDouble(split[1], 1D) : 1D;
             data = new Particle.DustOptions(color, (float) size);
-        }
-        else if (dataType == Particle.DustTransition.class) {
+        } else if (dataType == Particle.DustTransition.class) {
             Color colorStart = StringUtil.parseColor(split[0]);
             Color colorEnd = split.length >= 2 ? StringUtil.parseColor(split[1]) : colorStart;
             double size = split.length >= 3 ? StringUtil.getDouble(split[2], 1D) : 1D;
             data = new Particle.DustTransition(colorStart, colorEnd, 1.0f);
-        }
-        else if (dataType == ItemStack.class) {
+        } else if (dataType == ItemStack.class) {
             Material material = Material.getMaterial(from.toUpperCase());
-            if (material != null && !material.isAir()) data = new ItemStack(material);
-            else data = new ItemStack(Material.STONE);
+            if (material != null && !material.isAir()) {
+                data = new ItemStack(material);
+            } else {
+                data = new ItemStack(Material.STONE);
+            }
+        } else if (dataType != Void.class) {
+            return UniParticle.of(Particle.REDSTONE);
         }
-        else if (dataType != Void.class) return UniParticle.of(Particle.REDSTONE);
-
         return UniParticle.of(this.getParticle(), data);
     }
 
@@ -191,16 +187,17 @@ public class UniParticle {
     }
 
     public void play(@Nullable Player player, @NotNull Location location, double xOffset, double yOffset, double zOffset, double speed, int amount) {
-        if (this.isEmpty()) return;
-
+        if (this.isEmpty()) {
+            return;
+        }
         if (player == null) {
             World world = location.getWorld();
-            if (world == null) return;
-
+            if (world == null) {
+                return;
+            }
             world.spawnParticle(this.getParticle(), location, amount, xOffset, yOffset, zOffset, speed, this.getData());
             //EffectUtil.playParticle(location, this.getParticle(), this.getData(), xOffset, yOffset, zOffset, speed, amount);
-        }
-        else {
+        } else {
             player.spawnParticle(this.getParticle(), location, amount, xOffset, yOffset, zOffset, speed, this.getData());
             //EffectUtil.playParticle(player, location, this.getParticle(), this.getData(), xOffset, yOffset, zOffset, speed, amount);
         }

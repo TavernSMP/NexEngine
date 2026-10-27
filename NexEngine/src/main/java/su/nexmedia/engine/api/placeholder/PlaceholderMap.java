@@ -1,13 +1,12 @@
 package su.nexmedia.engine.api.placeholder;
 
-import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.Pair;
-import su.nexmedia.engine.utils.StringUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.utils.Pair;
+import su.nexmedia.engine.utils.StringUtil;
 
 public class PlaceholderMap {
 

@@ -7,7 +7,9 @@ public interface UserDataHolder<P extends NexPlugin<P>, U extends AbstractUser<P
 
     boolean setupDataHandlers();
 
-    @NotNull AbstractUserDataHandler<P, U> getData();
+    @NotNull
+    AbstractUserDataHandler<P, U> getData();
 
-    @NotNull AbstractUserManager<P, U> getUserManager();
+    @NotNull
+    AbstractUserManager<P, U> getUserManager();
 }

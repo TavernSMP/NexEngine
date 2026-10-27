@@ -8,7 +8,8 @@ import su.nexmedia.engine.api.data.sql.SQLQueries;
 
 public final class RenameTableExecutor extends SQLExecutor<Void> {
 
-    private final StorageType     storageType;
+    private final StorageType storageType;
+
     private String renameTo;
 
     private RenameTableExecutor(@NotNull String table, @NotNull StorageType storageType) {
@@ -30,14 +31,16 @@ public final class RenameTableExecutor extends SQLExecutor<Void> {
     @Override
     @NotNull
     public Void execute(@NotNull AbstractDataConnector connector) {
-        if (this.renameTo == null || this.renameTo.isEmpty()) return null;
-        if (!SQLQueries.hasTable(connector, this.getTable())) return null;
-
+        if (this.renameTo == null || this.renameTo.isEmpty()) {
+            return null;
+        }
+        if (!SQLQueries.hasTable(connector, this.getTable())) {
+            return null;
+        }
         StringBuilder sql = new StringBuilder();
         if (this.storageType == StorageType.MYSQL) {
             sql.append("RENAME TABLE ").append(this.getTable()).append(" TO ").append(this.renameTo).append(";");
-        }
-        else {
+        } else {
             sql.append("ALTER TABLE ").append(this.getTable()).append(" RENAME TO ").append(this.renameTo);
         }
         SQLQueries.executeStatement(connector, sql.toString());

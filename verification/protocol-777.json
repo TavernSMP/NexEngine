@@ -1,0 +1,19 @@
+{
+  "clientCount": 144,
+  "client": {
+    "boss_bar": 9,
+    "chunk_batch_finished": 11,
+    "window_items": 18,
+    "disconnect": 32,
+    "keep_alive": 45,
+    "login": 50,
+    "open_window": 60,
+    "position": 73
+  },
+  "server": {
+    "teleport_confirm": 0,
+    "chunk_batch_received": 11,
+    "keep_alive": 28,
+    "player_loaded": 44
+  }
+}

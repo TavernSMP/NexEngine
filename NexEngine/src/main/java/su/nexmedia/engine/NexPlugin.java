@@ -1,5 +1,10 @@
 package su.nexmedia.engine;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
@@ -22,21 +27,18 @@ import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.Reflex;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
-
 public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin {
 
     public static boolean isPaper = false;
 
-    protected ConfigManager<P>  configManager;
-    protected LangManager<P>    langManager;
+    protected ConfigManager<P> configManager;
+
+    protected LangManager<P> langManager;
+
     protected CommandManager<P> commandManager;
 
-    private Logger  logger;
+    private Logger logger;
+
     private boolean isEngine;
 
     public final boolean isEngine() {
@@ -57,17 +59,14 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin {
         long loadTook = System.currentTimeMillis();
         this.logger = this.getLogger();
         this.isEngine = this instanceof NexEngine;
-
         if (this.isEngine()) {
             if (!this.getServer().getVersion().contains("Spigot")) {
                 isPaper = true;
                 this.info("Seems like we have Paper based fork here...");
             }
-        }
-        else {
+        } else {
             EngineUtils.ENGINE.addChildren(this);
         }
-
         if (Version.getCurrent().isDeprecated()) {
             this.warn("==================================");
             this.warn("WARNING: You're running an outdated/deprecated server version (" + Version.getCurrent().getLocalized() + ")!");
@@ -121,16 +120,18 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin {
 
     public void registerPermissions(@NotNull Class<?> clazz) {
         for (Field field : Reflex.getFields(clazz)) {
-            if (!Permission.class.isAssignableFrom(field.getType())) continue;
-            if (!field.canAccess(null)) continue;
-
+            if (!Permission.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+            if (!field.canAccess(null)) {
+                continue;
+            }
             try {
                 Permission permission = (Permission) field.get(null);
                 if (this.getPluginManager().getPermission(permission.getName()) == null) {
                     this.getPluginManager().addPermission(permission);
                 }
-            }
-            catch (IllegalAccessException | IllegalArgumentException e) {
+            } catch (IllegalAccessException | IllegalArgumentException e) {
                 e.printStackTrace();
             }
         }
@@ -191,19 +192,14 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin {
     protected void loadManagers() {
         // Setup plugin Hooks.
         this.registerHooks();
-
         // Setup ConfigManager before any other managers.
         this.setupConfigManager();
-
         // Setup language manager after the main config.
         this.setupLangManager();
-
         this.registerPermissions();
-
         // Register plugin commands.
         this.commandManager = new CommandManager<>(this.getSelf());
         this.commandManager.setup();
-
         // Connect to the database if present.
         UserDataHolder<?, ?> dataHolder = null;
         if (this instanceof UserDataHolder) {
@@ -214,10 +210,8 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin {
                 return;
             }
         }
-
         // Custom plugin loaders.
         this.enable();
-
         // Load plugin users only when full plugin is loaded.
         if (dataHolder != null) {
             dataHolder.getUserManager().loadOnlineUsers();
@@ -225,22 +219,19 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin {
     }
 
     private void unloadManagers() {
-        this.getServer().getScheduler().cancelTasks(this); // First stop all plugin tasks
-
+        // First stop all plugin tasks
+        this.getServer().getScheduler().cancelTasks(this);
         this.disable();
         if (this.commandManager != null) {
             this.commandManager.shutdown();
         }
-
         // Unregister ALL plugin listeners.
         this.unregisterListeners();
-
         // Save user data and disconnect from the database.
         if (this instanceof UserDataHolder<?, ?> dataHolder) {
             dataHolder.getUserManager().shutdown();
             dataHolder.getData().shutdown();
         }
-
         this.getConfigManager().shutdown();
         this.getLangManager().shutdown();
     }

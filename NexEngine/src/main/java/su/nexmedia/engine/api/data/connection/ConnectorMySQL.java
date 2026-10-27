@@ -10,9 +10,7 @@ public class ConnectorMySQL extends AbstractDataConnector {
         this(plugin, config.mysqlHost, config.mysqlBase, config.mysqlUser, config.mysqlPassword);
     }
 
-    public ConnectorMySQL(@NotNull NexPlugin<?> plugin,
-                          @NotNull String host, @NotNull String base,
-                          @NotNull String userName, @NotNull String password) {
+    public ConnectorMySQL(@NotNull NexPlugin<?> plugin, @NotNull String host, @NotNull String base, @NotNull String userName, @NotNull String password) {
         super(plugin, "jdbc:mysql://" + host + "/" + base + "?allowPublicKeyRetrieval=true&useSSL=false", userName, password);
     }
 }

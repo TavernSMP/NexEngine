@@ -1,18 +1,19 @@
 package su.nexmedia.engine.utils;
 
+import java.util.*;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-
-import java.util.*;
 
 public class PlayerRankMap<T extends Number> {
 
     private final Map<String, T> values;
 
     private boolean negativeBetter;
+
     private boolean checkAsPermission;
+
     private String permissionPrefix;
 
     public PlayerRankMap(@NotNull Map<String, T> values) {
@@ -41,9 +42,9 @@ public class PlayerRankMap<T extends Number> {
             T number;
             if (clazz == Double.class) {
                 number = clazz.cast(cfg.getDouble(path + "." + rank));
+            } else {
+                number = clazz.cast(cfg.getInt(path + "." + rank));
             }
-            else number = clazz.cast(cfg.getInt(path + "." + rank));
-
             values.put(rank.toLowerCase(), number);
         }
         return new PlayerRankMap<>(values);
@@ -61,16 +62,16 @@ public class PlayerRankMap<T extends Number> {
         Optional<Map.Entry<String, T>> opt = this.values.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(Placeholders.DEFAULT) || groups.contains(entry.getKey())).min((entry1, entry2) -> {
             T val1 = entry1.getValue();
             T val2 = entry2.getValue();
-            if (this.isNegativeBetter() && val2.doubleValue() < 0) return 1;
-            if (this.isNegativeBetter() && val1.doubleValue() < 0) return -1;
-
+            if (this.isNegativeBetter() && val2.doubleValue() < 0) {
+                return 1;
+            }
+            if (this.isNegativeBetter() && val1.doubleValue() < 0) {
+                return -1;
+            }
             return Double.compare(val2.doubleValue(), val1.doubleValue());
         });
-
         if (opt.isEmpty() && this.isCheckAsPermission()) {
-            return this.values.entrySet().stream()
-                .filter(entry -> player.hasPermission(this.getPermissionPrefix() + entry.getKey()))
-                .max(Comparator.comparingDouble(e -> e.getValue().doubleValue())).map(Map.Entry::getValue).orElse(def);
+            return this.values.entrySet().stream().filter(entry -> player.hasPermission(this.getPermissionPrefix() + entry.getKey())).max(Comparator.comparingDouble(e -> e.getValue().doubleValue())).map(Map.Entry::getValue).orElse(def);
         }
         return opt.map(Map.Entry::getValue).orElse(def);
     }
@@ -81,16 +82,16 @@ public class PlayerRankMap<T extends Number> {
         Optional<Map.Entry<String, T>> opt = this.values.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(Placeholders.DEFAULT) || groups.contains(entry.getKey())).min((entry1, entry2) -> {
             T val1 = entry1.getValue();
             T val2 = entry2.getValue();
-            if (this.isNegativeBetter() && val2.doubleValue() < 0) return 1;
-            if (this.isNegativeBetter() && val1.doubleValue() < 0) return -1;
-
+            if (this.isNegativeBetter() && val2.doubleValue() < 0) {
+                return 1;
+            }
+            if (this.isNegativeBetter() && val1.doubleValue() < 0) {
+                return -1;
+            }
             return Double.compare(val1.doubleValue(), val2.doubleValue());
         });
-
         if (opt.isEmpty() && this.isCheckAsPermission()) {
-            return this.values.entrySet().stream()
-                .filter(entry -> player.hasPermission(this.getPermissionPrefix() + entry.getKey()))
-                .min(Comparator.comparingDouble(e -> e.getValue().doubleValue())).map(Map.Entry::getValue).orElse(def);
+            return this.values.entrySet().stream().filter(entry -> player.hasPermission(this.getPermissionPrefix() + entry.getKey())).min(Comparator.comparingDouble(e -> e.getValue().doubleValue())).map(Map.Entry::getValue).orElse(def);
         }
         return opt.map(Map.Entry::getValue).orElse(def);
     }

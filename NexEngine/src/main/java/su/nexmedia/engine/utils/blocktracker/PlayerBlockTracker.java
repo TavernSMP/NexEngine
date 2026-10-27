@@ -1,6 +1,8 @@
 package su.nexmedia.engine.utils.blocktracker;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.*;
+import java.util.function.Predicate;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
@@ -11,13 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.EngineUtils;
 
-import java.util.*;
-import java.util.function.Predicate;
-
 public final class PlayerBlockTracker {
 
-    public static final  Set<Predicate<Block>>   BLOCK_FILTERS     = new HashSet<>();
-    public static final  NamespacedKey           TRACKED_DATA_KEY  = NamespacedKey.minecraft("tracked_chunk_data");
+    public static final Set<Predicate<Block>> BLOCK_FILTERS = new HashSet<>();
+
+    public static final NamespacedKey TRACKED_DATA_KEY = NamespacedKey.minecraft("tracked_chunk_data");
+
     private static final Map<UUID, TrackedWorld> TRACKED_WORLD_MAP = new Object2ObjectOpenHashMap<>();
 
     private static TrackListener<?> listener;
@@ -89,7 +90,9 @@ public final class PlayerBlockTracker {
     }
 
     public static void track(@NotNull Block block) {
-        if (BLOCK_FILTERS.stream().noneMatch(filter -> filter.test(block))) return;
+        if (BLOCK_FILTERS.stream().noneMatch(filter -> filter.test(block))) {
+            return;
+        }
         trackForce(block);
     }
 

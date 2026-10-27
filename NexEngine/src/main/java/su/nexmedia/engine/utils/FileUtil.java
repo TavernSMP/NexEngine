@@ -1,7 +1,5 @@
 package su.nexmedia.engine.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 
 public class FileUtil {
 
@@ -23,23 +22,23 @@ public class FileUtil {
             }
             outputStream.close();
             inputStream.close();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
     public static boolean create(@NotNull File file) {
-        if (file.exists()) return false;
-
+        if (file.exists()) {
+            return false;
+        }
         File parent = file.getParentFile();
-        if (parent == null) return false;
-
+        if (parent == null) {
+            return false;
+        }
         parent.mkdirs();
         try {
             return file.createNewFile();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -48,16 +47,15 @@ public class FileUtil {
     @NotNull
     public static List<File> getFiles(@NotNull String path, boolean deep) {
         List<File> files = new ArrayList<>();
-
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
-        if (listOfFiles == null) return files;
-
+        if (listOfFiles == null) {
+            return files;
+        }
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 files.add(file);
-            }
-            else if (file.isDirectory() && deep) {
+            } else if (file.isDirectory() && deep) {
                 files.addAll(getFiles(file.getPath(), true));
             }
         }
@@ -68,8 +66,9 @@ public class FileUtil {
     public static List<File> getFolders(@NotNull String path) {
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
-        if (listOfFiles == null) return Collections.emptyList();
-
+        if (listOfFiles == null) {
+            return Collections.emptyList();
+        }
         return Stream.of(listOfFiles).filter(File::isDirectory).toList();
     }
 
@@ -78,8 +77,9 @@ public class FileUtil {
     }
 
     public static boolean deleteRecursive(@NotNull File dir) {
-        if (!dir.exists()) return false;
-
+        if (!dir.exists()) {
+            return false;
+        }
         File[] inside = dir.listFiles();
         if (inside != null) {
             for (File file : inside) {

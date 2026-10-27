@@ -1,5 +1,8 @@
 package su.nexmedia.engine.api.data.sql.executor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.StorageType;
 import su.nexmedia.engine.api.data.connection.AbstractDataConnector;
@@ -10,14 +13,12 @@ import su.nexmedia.engine.api.data.sql.SQLQueries;
 import su.nexmedia.engine.api.data.sql.SQLValue;
 import su.nexmedia.engine.api.data.sql.column.ColumnType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public final class AlterTableExecutor extends SQLExecutor<Void> {
 
-    private final StorageType    storageType;
+    private final StorageType storageType;
+
     private final List<SQLValue> columns;
+
     private Type type;
 
     private AlterTableExecutor(@NotNull String table, @NotNull StorageType storageType) {
@@ -27,7 +28,10 @@ public final class AlterTableExecutor extends SQLExecutor<Void> {
     }
 
     private enum Type {
-        ADD_COLUMN, RENAME_COLUMN, DROP_COLUMN
+
+        ADD_COLUMN,
+        RENAME_COLUMN,
+        DROP_COLUMN
     }
 
     @NotNull
@@ -75,34 +79,33 @@ public final class AlterTableExecutor extends SQLExecutor<Void> {
     @Override
     @NotNull
     public Void execute(@NotNull AbstractDataConnector connector) {
-        if (this.columns.isEmpty()) return null;
-
+        if (this.columns.isEmpty()) {
+            return null;
+        }
         if (this.type == Type.ADD_COLUMN) {
             this.columns.forEach(value -> {
-                if (SQLQueries.hasColumn(connector, this.getTable(), value.getColumn())) return;
-
-                String sql = "ALTER TABLE " + this.getTable() + " ADD "
-                    + value.getColumn().getName() + " " + value.getColumn().formatType(this.storageType);
-
+                if (SQLQueries.hasColumn(connector, this.getTable(), value.getColumn())) {
+                    return;
+                }
+                String sql = "ALTER TABLE " + this.getTable() + " ADD " + value.getColumn().getName() + " " + value.getColumn().formatType(this.storageType);
                 if (connector instanceof ConnectorSQLite || value.getColumn().getType() != ColumnType.STRING) {
                     sql = sql + " DEFAULT '" + value.getValue() + "'";
                 }
-
                 SQLQueries.executeStatement(connector, sql);
             });
-        }
-        else if (this.type == Type.RENAME_COLUMN) {
+        } else if (this.type == Type.RENAME_COLUMN) {
             this.columns.forEach(value -> {
-                if (!SQLQueries.hasColumn(connector, this.getTable(), value.getColumn())) return;
-
+                if (!SQLQueries.hasColumn(connector, this.getTable(), value.getColumn())) {
+                    return;
+                }
                 String sql = "ALTER TABLE " + this.getTable() + " RENAME COLUMN " + value.getColumn().getName() + " TO " + value.getValue();
                 SQLQueries.executeStatement(connector, sql);
             });
-        }
-        else if (this.type == Type.DROP_COLUMN) {
+        } else if (this.type == Type.DROP_COLUMN) {
             this.columns.forEach(value -> {
-                if (!SQLQueries.hasColumn(connector, this.getTable(), value.getColumn())) return;
-
+                if (!SQLQueries.hasColumn(connector, this.getTable(), value.getColumn())) {
+                    return;
+                }
                 String sql = "ALTER TABLE " + this.getTable() + " DROP COLUMN " + value.getColumn().getName();
                 SQLQueries.executeStatement(connector, sql);
             });

@@ -13,8 +13,11 @@ import su.nexmedia.engine.utils.StringUtil;
 public class UniSound {
 
     private final String soundName;
+
     private final Sound soundType;
+
     private final float volume;
+
     private final float pitch;
 
     public UniSound(@NotNull String soundName, @Nullable Sound soundType, float volume, float pitch) {
@@ -41,18 +44,10 @@ public class UniSound {
 
     @NotNull
     public static UniSound read(@NotNull JYML cfg, @NotNull String path) {
-        String soundName = JOption.create(path + ".Name", "null",
-            "Sound name. You can use Spigot sound names, or ones from your resource pack.",
-            "Spigot Sounds: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html").read(cfg);
-
-        float volume = JOption.create(path + ".Volume", 0.8F,
-            "Sound volume. From 0.0 to 1.0.").read(cfg).floatValue();
-
-        float pitch = JOption.create(path + ".Pitch", 1D,
-            "Sound speed. From 0.5 to 2.0").read(cfg).floatValue();
-
+        String soundName = JOption.create(path + ".Name", "null", "Sound name. You can use Spigot sound names, or ones from your resource pack.", "Spigot Sounds: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html").read(cfg);
+        float volume = JOption.create(path + ".Volume", 0.8F, "Sound volume. From 0.0 to 1.0.").read(cfg).floatValue();
+        float pitch = JOption.create(path + ".Pitch", 1D, "Sound speed. From 0.5 to 2.0").read(cfg).floatValue();
         Sound soundType = StringUtil.getEnum(soundName, Sound.class).orElse(null);
-
         return new UniSound(soundName, soundType, volume, pitch);
     }
 
@@ -67,27 +62,28 @@ public class UniSound {
     }
 
     public void play(@NotNull Player player) {
-        if (this.isEmpty()) return;
-
+        if (this.isEmpty()) {
+            return;
+        }
         Location location = player.getLocation();
         if (this.getSoundType() == null) {
             player.playSound(location, this.getSoundName(), this.getVolume(), this.getPitch());
-        }
-        else {
+        } else {
             player.playSound(location, this.getSoundType(), this.getVolume(), this.getPitch());
         }
     }
 
     public void play(@NotNull Location location) {
-        if (this.isEmpty()) return;
-
+        if (this.isEmpty()) {
+            return;
+        }
         World world = location.getWorld();
-        if (world == null) return;
-
+        if (world == null) {
+            return;
+        }
         if (this.getSoundType() == null) {
             world.playSound(location, this.getSoundName(), this.getVolume(), this.getPitch());
-        }
-        else {
+        } else {
             world.playSound(location, this.getSoundType(), this.getVolume(), this.getPitch());
         }
     }

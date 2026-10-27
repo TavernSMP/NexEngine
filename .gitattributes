@@ -1,0 +1,8 @@
+* text=auto
+*.java text eol=lf
+*.gradle text eol=lf
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+*.jar binary
+NexEngine/src/main/resources/config.yml -text
+NexEngine/src/main/resources/lang/*.yml -text

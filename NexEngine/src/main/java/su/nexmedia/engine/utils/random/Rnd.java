@@ -1,10 +1,9 @@
 package su.nexmedia.engine.utils.random;
 
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.Pair;
-
-import java.util.*;
 
 public class Rnd {
 
@@ -16,7 +15,9 @@ public class Rnd {
 
     public static float get(boolean normalize) {
         float f = Rnd.get();
-        if (normalize) f *= 100f;
+        if (normalize) {
+            f *= 100f;
+        }
         return f;
     }
 
@@ -47,8 +48,9 @@ public class Rnd {
 
     @NotNull
     public static <E> E get(@NotNull List<E> list) {
-        if (list.isEmpty()) throw new NoSuchElementException("Empty list provided!");
-
+        if (list.isEmpty()) {
+            throw new NoSuchElementException("Empty list provided!");
+        }
         return list.get(get(list.size()));
     }
 
@@ -59,15 +61,14 @@ public class Rnd {
 
     @NotNull
     public static <T> T getByWeight(@NotNull Map<T, Double> itemsMap) {
-        List<Pair<T, Double>> items = CollectionsUtil.sortAscent(itemsMap).entrySet().stream()
-            .filter(e -> e.getValue() > 0D)
-            .map(e -> Pair.of(e.getKey(), e.getValue())).toList();
+        List<Pair<T, Double>> items = CollectionsUtil.sortAscent(itemsMap).entrySet().stream().filter(e -> e.getValue() > 0D).map(e -> Pair.of(e.getKey(), e.getValue())).toList();
         double totalWeight = items.stream().mapToDouble(Pair::getSecond).sum();
-
         int index = 0;
         for (double chance = Rnd.nextDouble() * totalWeight; index < items.size() - 1; ++index) {
             chance -= items.get(index).getSecond();
-            if (chance <= 0D) break;
+            if (chance <= 0D) {
+                break;
+            }
         }
         return items.get(index).getFirst();
     }

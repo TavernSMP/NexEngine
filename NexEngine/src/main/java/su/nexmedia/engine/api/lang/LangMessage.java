@@ -1,5 +1,15 @@
 package su.nexmedia.engine.api.lang;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -13,31 +23,24 @@ import su.nexmedia.engine.utils.message.NexParser;
 import su.nexmedia.engine.utils.regex.RegexUtil;
 import su.nexmedia.engine.utils.values.UniSound;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 public class LangMessage {
 
     private static final Pattern PATTERN_OPTIONS = Pattern.compile("<\\!(.*?)\\!>");
 
     public enum OutputType {
-        CHAT, ACTION_BAR, TITLES, NONE,
+
+        CHAT,
+        ACTION_BAR,
+        TITLES,
+        NONE
     }
 
     enum Option {
+
         PREFIX("prefix"),
         SOUND("sound"),
         TYPE("type"),
-        PAPI("papi"),
-        ;
+        PAPI("papi");
 
         private final Pattern pattern;
 
@@ -52,14 +55,22 @@ public class LangMessage {
     }
 
     private final NexPlugin<?> plugin;
-    @Deprecated private final PlaceholderMap placeholderMap;
+
+    @Deprecated
+    private final PlaceholderMap placeholderMap;
 
     private String msgRaw;
+
     private String msgLocalized;
+
     private OutputType type = OutputType.CHAT;
+
     private boolean hasPrefix = true;
+
     private boolean papi = false;
+
     private Sound sound;
+
     private int[] titleTimes = new int[3];
 
     public LangMessage(@NotNull NexPlugin<?> plugin, @NotNull String raw) {
@@ -68,7 +79,6 @@ public class LangMessage {
         this.plugin.getLangManager().getPlaceholders().forEach((placeholder, value) -> {
             this.placeholderMap.add(placeholder, () -> value);
         });
-
         this.setRaw(raw);
     }
 
@@ -86,33 +96,39 @@ public class LangMessage {
 
     void setOptions(@NotNull String msg) {
         Matcher matcher = RegexUtil.getMatcher(PATTERN_OPTIONS, msg);
-        if (!RegexUtil.matcherFind(matcher)) return;
-
+        if (!RegexUtil.matcherFind(matcher)) {
+            return;
+        }
         // String with only args
         String matchFull = matcher.group(0);
         String matchOptions = matcher.group(1).trim();
         this.msgLocalized = msg.replace(matchFull, "");
-
         for (Option option : Option.values()) {
             Matcher matcherParam = RegexUtil.getMatcher(option.getPattern(), matchOptions);
-            if (!RegexUtil.matcherFind(matcherParam)) continue;
-
+            if (!RegexUtil.matcherFind(matcherParam)) {
+                continue;
+            }
             String optionValue = matcherParam.group(1).stripLeading();
-            switch (option) {
-                case TYPE -> {
-                    String[] split = optionValue.split(":");
-                    this.type = StringUtil.getEnum(split[0], OutputType.class).orElse(OutputType.CHAT);
-                    if (this.type == OutputType.TITLES) {
-                        this.titleTimes[0] = split.length >= 2 ? StringUtil.getInteger(split[1], -1) : -1;
-                        this.titleTimes[1] = split.length >= 3 ? StringUtil.getInteger(split[2], -1, true) : -1;
-                        this.titleTimes[2] = split.length >= 4 ? StringUtil.getInteger(split[3], -1) : -1;
-
-                        if (this.titleTimes[1] < 0) this.titleTimes[1] = Short.MAX_VALUE;
+            switch(option) {
+                case TYPE ->
+                    {
+                        String[] split = optionValue.split(":");
+                        this.type = StringUtil.getEnum(split[0], OutputType.class).orElse(OutputType.CHAT);
+                        if (this.type == OutputType.TITLES) {
+                            this.titleTimes[0] = split.length >= 2 ? StringUtil.getInteger(split[1], -1) : -1;
+                            this.titleTimes[1] = split.length >= 3 ? StringUtil.getInteger(split[2], -1, true) : -1;
+                            this.titleTimes[2] = split.length >= 4 ? StringUtil.getInteger(split[3], -1) : -1;
+                            if (this.titleTimes[1] < 0) {
+                                this.titleTimes[1] = Short.MAX_VALUE;
+                            }
+                        }
                     }
-                }
-                case PREFIX -> this.hasPrefix = Boolean.parseBoolean(optionValue);
-                case PAPI -> this.papi = Boolean.parseBoolean(optionValue) && EngineUtils.hasPlaceholderAPI();
-                case SOUND -> this.sound = StringUtil.getEnum(optionValue, Sound.class).orElse(null);
+                case PREFIX ->
+                    this.hasPrefix = Boolean.parseBoolean(optionValue);
+                case PAPI ->
+                    this.papi = Boolean.parseBoolean(optionValue) && EngineUtils.hasPlaceholderAPI();
+                case SOUND ->
+                    this.sound = StringUtil.getEnum(optionValue, Sound.class).orElse(null);
             }
         }
     }
@@ -148,14 +164,17 @@ public class LangMessage {
 
     @NotNull
     public LangMessage replace(@NotNull String var, @NotNull Object replacer) {
-        if (this.isEmpty()) return this;
+        if (this.isEmpty()) {
+            return this;
+        }
         return this.replace(str -> str.replace(var, String.valueOf(replacer)));
     }
 
     @NotNull
     public LangMessage replace(@NotNull UnaryOperator<String> replacer) {
-        if (this.isEmpty()) return this;
-
+        if (this.isEmpty()) {
+            return this;
+        }
         LangMessage msgCopy = new LangMessage(this);
         msgCopy.setLocalized(replacer.apply(msgCopy.getLocalized()));
         return msgCopy;
@@ -163,8 +182,9 @@ public class LangMessage {
 
     @NotNull
     public LangMessage replace(@NotNull Predicate<String> predicate, @NotNull BiConsumer<String, List<String>> replacer) {
-        if (this.isEmpty()) return this;
-
+        if (this.isEmpty()) {
+            return this;
+        }
         LangMessage msgCopy = new LangMessage(this);
         List<String> replaced = new ArrayList<>();
         msgCopy.asList().forEach(line -> {
@@ -183,19 +203,20 @@ public class LangMessage {
     }
 
     public void broadcast() {
-        if (this.isEmpty()) return;
-
+        if (this.isEmpty()) {
+            return;
+        }
         Bukkit.getServer().getOnlinePlayers().forEach(this::send);
         this.send(Bukkit.getServer().getConsoleSender());
     }
 
     public void send(@NotNull CommandSender sender) {
-        if (this.isEmpty()) return;
-
+        if (this.isEmpty()) {
+            return;
+        }
         if (this.sound != null && sender instanceof Player player) {
             UniSound.of(this.sound).play(player);
         }
-
         if (this.type == LangMessage.OutputType.CHAT) {
             String prefix = hasPrefix ? plugin.getConfigManager().pluginPrefix : "";
             this.asList(sender).forEach(line -> {
@@ -203,12 +224,10 @@ public class LangMessage {
             });
             return;
         }
-
         if (sender instanceof Player player) {
             if (this.type == LangMessage.OutputType.ACTION_BAR) {
                 PlayerUtil.sendActionBar(player, this.getLocalized(player));
-            }
-            else if (this.type == LangMessage.OutputType.TITLES) {
+            } else if (this.type == LangMessage.OutputType.TITLES) {
                 List<String> list = this.asList(player);
                 String title = list.size() > 0 ? NexParser.toPlainText(list.get(0)) : "";
                 String subtitle = list.size() > 1 ? NexParser.toPlainText(list.get(1)) : "";
@@ -229,8 +248,7 @@ public class LangMessage {
 
     @NotNull
     private List<String> asList(@NotNull String localized) {
-        return this.isEmpty() ? Collections.emptyList() : Stream.of(localized.split("\\\\n"))
-            .filter(Predicate.not(String::isEmpty)).toList();
+        return this.isEmpty() ? Collections.emptyList() : Stream.of(localized.split("\\\\n")).filter(Predicate.not(String::isEmpty)).toList();
     }
 
     /**

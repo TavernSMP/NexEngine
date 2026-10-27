@@ -1,22 +1,21 @@
 package su.nexmedia.engine.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.TreeMap;
+import org.jetbrains.annotations.NotNull;
 
 public class NumberUtil {
 
     private static final DecimalFormat FORMAT_ROUND_HUMAN;
+
     private final static TreeMap<Integer, String> ROMAN_MAP = new TreeMap<>();
 
     static {
         FORMAT_ROUND_HUMAN = new DecimalFormat("#,###.##", new DecimalFormatSymbols(Locale.ENGLISH));
-
         ROMAN_MAP.put(1000, "M");
         ROMAN_MAP.put(900, "CM");
         ROMAN_MAP.put(500, "D");
@@ -43,8 +42,9 @@ public class NumberUtil {
 
     @NotNull
     public static String toRoman(int number) {
-        if (number <= 0) return String.valueOf(number);
-
+        if (number <= 0) {
+            return String.valueOf(number);
+        }
         int key = ROMAN_MAP.floorKey(number);
         if (number == key) {
             return ROMAN_MAP.get(number);
@@ -57,7 +57,8 @@ public class NumberUtil {
         int remain = whole;
         int partsLeft = parts;
         for (int i = 0; partsLeft > 0; i++) {
-            int size = (remain + partsLeft - 1) / partsLeft; // rounded up, aka ceiling
+            // rounded up, aka ceiling
+            int size = (remain + partsLeft - 1) / partsLeft;
             arr[i] = size;
             remain -= size;
             partsLeft--;

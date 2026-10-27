@@ -1,13 +1,12 @@
 package su.nexmedia.engine.utils;
 
-import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.lang.EngineLang;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.lang.EngineLang;
 
 public class TimeUtil {
 
@@ -17,7 +16,6 @@ public class TimeUtil {
         long hours = TimeUnit.MILLISECONDS.toHours(time) % 24;
         long minutes = TimeUnit.MILLISECONDS.toMinutes(time) % 60;
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) % 60;
-
         StringBuilder str = new StringBuilder();
         if (days > 0) {
             if (str.length() > 0) {
@@ -43,7 +41,6 @@ public class TimeUtil {
             }
             str.append(EngineUtils.ENGINE.getMessage(EngineLang.TIME_SEC).replace("%s%", seconds).getLocalized());
         }
-
         return StringUtil.oneSpace(str.toString());
     }
 
@@ -63,7 +60,6 @@ public class TimeUtil {
         long hours = TimeUnit.MILLISECONDS.toHours(ms) % 24;
         long minutes = TimeUnit.MILLISECONDS.toMinutes(ms) % 60;
         long seconds = TimeUnit.MILLISECONDS.toSeconds(ms) % 60;
-
         return LocalTime.of((int) hours, (int) minutes, (int) seconds);
     }
 

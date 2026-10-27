@@ -1,5 +1,12 @@
 package su.nexmedia.engine.lang;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.*;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
@@ -15,14 +22,6 @@ import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.utils.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.*;
-
 public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
 
     public static final String DIR_LANG = "/lang/";
@@ -30,7 +29,10 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
     protected static JYML assetsConfig;
 
     protected final Map<String, LangMessage> messages;
-    @Deprecated protected final Map<String, String> placeholders;
+
+    @Deprecated
+    protected final Map<String, String> placeholders;
+
     protected JYML config;
 
     public LangManager(@NotNull P plugin) {
@@ -42,24 +44,13 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
     @Override
     protected void onLoad() {
         String langCode = plugin.getConfigManager().languageCode;
-
         if (this.plugin.isEngine()) {
             this.downloadAssets(langCode);
             assetsConfig = JYML.loadOrExtract(plugin, DIR_LANG, "assets_" + langCode + ".yml");
         }
         this.plugin.getConfigManager().extractResources(DIR_LANG);
         this.config = JYML.loadOrExtract(plugin, DIR_LANG, "messages_" + langCode + ".yml");
-        this.placeholders.putAll(JOption.forMap("Placeholders",
-            (cfg, path, key) -> cfg.getString(path + "." + key, key),
-            Map.of(
-                "%red%", Colors.RED,
-                "%green%", Colors.GREEN,
-                "%gray%", Colors.GRAY
-            ),
-            "Here you can create your own custom placeholders to use it in language config.",
-            "Key = Placeholder, Value = Replacer."
-        ).setWriter((cfg, path, map) -> map.forEach((place, value) -> cfg.set(path + "." + place, value))).read(this.config));
-
+        this.placeholders.putAll(JOption.forMap("Placeholders", (cfg, path, key) -> cfg.getString(path + "." + key, key), Map.of("%red%", Colors.RED, "%green%", Colors.GREEN, "%gray%", Colors.GRAY), "Here you can create your own custom placeholders to use it in language config.", "Key = Placeholder, Value = Replacer.").setWriter((cfg, path, map) -> map.forEach((place, value) -> cfg.set(path + "." + place, value))).read(this.config));
         // Inherit Engine messages
         if (!this.plugin.isEngine()) {
             EngineUtils.ENGINE.getLangManager().getMessages().forEach((key, message) -> {
@@ -76,22 +67,20 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
 
     private void downloadAssets(@NotNull String langCode) {
         File file = new File(plugin.getDataFolder().getAbsolutePath() + DIR_LANG, "assets_" + langCode + ".yml");
-        if (file.exists()) return;
-
+        if (file.exists()) {
+            return;
+        }
         FileUtil.create(file);
-
         this.plugin.info("Downloading assets for your language from github...");
         String url = "https://github.com/nulli0n/NexEngine-spigot/raw/master/assets/" + langCode + ".yml";
-
         try (BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             //exception.printStackTrace();
             this.plugin.error("Could not download language assets for '" + langCode + "' (no such asset?).");
         }
@@ -156,12 +145,10 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
         if (this.write(key)) {
             this.getConfig().saveChanges();
         }
-
         List<String> list = this.getConfig().getStringList(key.getPath());
         String text = !list.isEmpty() ? String.join("\\n", list) : this.getConfig().getString(key.getPath(), "<Missing Message [" + key.getPath() + "]>");
         LangMessage message = new LangMessage(plugin, text);
         this.getMessages().put(key.getPath(), message);
-
         return message;
     }
 
@@ -175,29 +162,24 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
             if (!LangKey.class.isAssignableFrom(field.getType())) {
                 continue;
             }
-
             LangKey langKey;
             try {
                 langKey = (LangKey) field.get(this);
-            }
-            catch (IllegalArgumentException | IllegalAccessException e) {
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
                 continue;
             }
-
             // Do not load/set messages of super class(es) or if they are already present in the lang file.
             if (!field.getDeclaringClass().equals(clazz)) {
                 continue;
             }
-
             // Clear old loaded messages.
             this.getMessages().remove(langKey.getPath());
-
             // For engine, we have to preload the message, so it can be added to child plugin's messages.
             if (this.plugin.isEngine()) {
                 this.loadMessage(langKey);
-            }
-            else { // For child plugins, we can only write it to the config and not precache it.
+            } else {
+                // For child plugins, we can only write it to the config and not precache it.
                 this.write(langKey);
             }
         }
@@ -209,28 +191,26 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
             if (!EditorLocale.class.isAssignableFrom(field.getType())) {
                 continue;
             }
-
             EditorLocale locale;
             try {
                 locale = (EditorLocale) field.get(this);
-            }
-            catch (IllegalArgumentException | IllegalAccessException e) {
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
                 continue;
             }
-
             // Do not load/set messages of super class(es) or if they are already present in the lang file.
             if (!field.getDeclaringClass().equals(clazz)) {
                 continue;
             }
-
             this.read(locale);
         }
         this.getConfig().saveChanges();
     }
 
     public void loadEnum(@NotNull Class<? extends Enum<?>> clazz) {
-        if (!clazz.isEnum()) return;
+        if (!clazz.isEnum()) {
+            return;
+        }
         for (Object eName : clazz.getEnumConstants()) {
             String name = eName.toString();
             String path = clazz.getSimpleName() + "." + name;
@@ -302,7 +282,6 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
     public static String getAsset(@NotNull String path, @NotNull String nameRaw) {
         getAssetsConfig().addMissing(path + "." + nameRaw, StringUtil.capitalizeUnderscored(nameRaw));
         getAssetsConfig().saveChanges();
-
         return getAsset(path + "." + nameRaw).orElse(nameRaw);
     }
 

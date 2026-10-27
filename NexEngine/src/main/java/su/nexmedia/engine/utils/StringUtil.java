@@ -1,18 +1,19 @@
 package su.nexmedia.engine.utils;
 
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.config.EngineConfig;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nexmedia.engine.utils.regex.TimedMatcher;
 
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
-
 public class StringUtil {
 
-    private static final Pattern ID_PATTERN = Pattern.compile("[<>\\%\\$\\!\\@\\#\\^\\&\\*\\(\\)\\,\\.\\'\\:\\;\\\"\\}\\]\\{\\[\\=\\+\\`\\~\\\\]");//Pattern.compile("[^a-zA-Zа-яА-Я_0-9]");
+    //Pattern.compile("[^a-zA-Zа-яА-Я_0-9]");
+    private static final Pattern ID_PATTERN = Pattern.compile("[<>\\%\\$\\!\\@\\#\\^\\&\\*\\(\\)\\,\\.\\'\\:\\;\\\"\\}\\]\\{\\[\\=\\+\\`\\~\\\\]");
+
     private static final Pattern ID_STRICT_PATTERN = Pattern.compile("[^a-zA-Zа-яА-Я_0-9]");
 
     @NotNull
@@ -39,15 +40,13 @@ public class StringUtil {
             if (line.contains(placeholder)) {
                 if (!keep) {
                     replaced.addAll(replacer);
-                }
-                else {
+                } else {
                     replacer.forEach(lineRep -> replaced.add(line.replace(placeholder, lineRep)));
                 }
                 continue;
             }
             replaced.add(line);
         }
-
         return replaced;
     }
 
@@ -62,8 +61,9 @@ public class StringUtil {
         for (String line : orig) {
             if (line.equalsIgnoreCase(placeholder)) {
                 replaced.addAll(replacer);
+            } else {
+                replaced.add(line);
             }
-            else replaced.add(line);
         }
         return replaced;
     }
@@ -73,16 +73,13 @@ public class StringUtil {
         if (text.isEmpty() || replacements.isEmpty()) {
             return text;
         }
-
         final int searchLength = replacements.size();
         // keep track of which still have matches
         final boolean[] noMoreMatchesForReplIndex = new boolean[searchLength];
-
         // index on index that the match was found
         int textIndex = -1;
         int replaceIndex = -1;
         int tempIndex;
-
         // index of replace array that will replace the search string found
         // NOTE: logic duplicated below START
         for (int i = 0; i < searchLength; i++) {
@@ -90,23 +87,19 @@ public class StringUtil {
                 continue;
             }
             tempIndex = text.indexOf(replacements.get(i).getFirst());
-
             // see if we need to keep searching for this
             if (tempIndex == -1) {
                 noMoreMatchesForReplIndex[i] = true;
-            }
-            else if (textIndex == -1 || tempIndex < textIndex) {
+            } else if (textIndex == -1 || tempIndex < textIndex) {
                 textIndex = tempIndex;
                 replaceIndex = i;
             }
         }
         // NOTE: logic mostly below END
-
         // no search strings found, we are done
         if (textIndex == -1) {
             return text;
         }
-
         int start = 0;
         final StringBuilder buf = new StringBuilder();
         while (textIndex != -1) {
@@ -114,9 +107,7 @@ public class StringUtil {
                 buf.append(text.charAt(i));
             }
             buf.append(replacements.get(replaceIndex).getSecond().get());
-
             start = textIndex + replacements.get(replaceIndex).getFirst().length();
-
             textIndex = -1;
             replaceIndex = -1;
             // find the next earliest match
@@ -126,7 +117,6 @@ public class StringUtil {
                     continue;
                 }
                 tempIndex = text.indexOf(replacements.get(i).getFirst(), start);
-
                 // see if we need to keep searching for this
                 if (tempIndex == -1) {
                     noMoreMatchesForReplIndex[i] = true;
@@ -136,7 +126,6 @@ public class StringUtil {
                 }
             }
             // NOTE: logic duplicated above END
-
         }
         final int textLength = text.length();
         for (int i = start; i < textLength; i++) {
@@ -152,11 +141,11 @@ public class StringUtil {
     public static double getDouble(@NotNull String input, double def, boolean allowNegative) {
         try {
             double amount = Double.parseDouble(input);
-            if (Double.isNaN(amount) || Double.isInfinite(amount)) return def;
-
+            if (Double.isNaN(amount) || Double.isInfinite(amount)) {
+                return def;
+            }
             return (amount < 0D && !allowNegative ? def : amount);
-        }
-        catch (NumberFormatException ex) {
+        } catch (NumberFormatException ex) {
             return def;
         }
     }
@@ -175,8 +164,7 @@ public class StringUtil {
         for (int index = 0; index < split.length; index++) {
             try {
                 array[index] = Integer.parseInt(split[index]);
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 array[index] = 0;
             }
         }
@@ -187,8 +175,7 @@ public class StringUtil {
     public static <T extends Enum<T>> Optional<T> getEnum(@NotNull String str, @NotNull Class<T> clazz) {
         try {
             return Optional.of(Enum.valueOf(clazz, str.toUpperCase()));
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return Optional.empty();
         }
     }
@@ -197,14 +184,17 @@ public class StringUtil {
     public static Color parseColor(@NotNull String colorRaw) {
         String[] rgb = colorRaw.split(",");
         int red = StringUtil.getInteger(rgb[0], 0);
-        if (red < 0) red = Rnd.get(255);
-
+        if (red < 0) {
+            red = Rnd.get(255);
+        }
         int green = rgb.length >= 2 ? StringUtil.getInteger(rgb[1], 0) : 0;
-        if (green < 0) green = Rnd.get(255);
-
+        if (green < 0) {
+            green = Rnd.get(255);
+        }
         int blue = rgb.length >= 3 ? StringUtil.getInteger(rgb[2], 0) : 0;
-        if (blue < 0) blue = Rnd.get(255);
-
+        if (blue < 0) {
+            blue = Rnd.get(255);
+        }
         return Color.fromRGB(red, green, blue);
     }
 
@@ -234,7 +224,6 @@ public class StringUtil {
         if (length > 0 && clean.length() > length) {
             clean = clean.substring(0, length);
         }
-
         TimedMatcher matcher = TimedMatcher.create(pattern, clean, 200);
         //Matcher matcher = RegexUtil.getMatcher(ID_STRICT_PATTERN, clean);
         return matcher.replaceAll("");
@@ -247,30 +236,29 @@ public class StringUtil {
 
     @NotNull
     public static String capitalizeFully(@NotNull String str) {
-        if (str.length() == 0) return str;
-
+        if (str.length() == 0) {
+            return str;
+        }
         return capitalize(str.toLowerCase());
     }
 
     @NotNull
     public static String capitalize(@NotNull String str) {
-        if (str.length() == 0) return str;
-
+        if (str.length() == 0) {
+            return str;
+        }
         int length = str.length();
         StringBuilder builder = new StringBuilder(length);
         boolean capitalizeNext = true;
-
         for (int index = 0; index < length; ++index) {
             char letter = str.charAt(index);
             if (Character.isWhitespace(letter)) {
                 builder.append(letter);
                 capitalizeNext = true;
-            }
-            else if (capitalizeNext) {
+            } else if (capitalizeNext) {
                 builder.append(Character.toTitleCase(letter));
                 capitalizeNext = false;
-            }
-            else {
+            } else {
                 builder.append(letter);
             }
         }
@@ -279,7 +267,9 @@ public class StringUtil {
 
     @NotNull
     public static String capitalizeFirstLetter(@NotNull String original) {
-        if (original.isEmpty()) return original;
+        if (original.isEmpty()) {
+            return original;
+        }
         return original.substring(0, 1).toUpperCase() + original.substring(1);
     }
 
@@ -294,7 +284,9 @@ public class StringUtil {
             String line = original.get(index);
             if (line.isEmpty()) {
                 String last = stripped.isEmpty() ? null : stripped.get(stripped.size() - 1);
-                if (last == null || last.isEmpty() || index == (original.size() - 1)) continue;
+                if (last == null || last.isEmpty() || index == (original.size() - 1)) {
+                    continue;
+                }
             }
             stripped.add(line);
         }
@@ -313,33 +305,26 @@ public class StringUtil {
         if (input.length() > EngineConfig.TAB_COMPLETER_REGEX_MAX_LENGTH.get()) {
             return copyPartialMatches(input, results);
         }
-
         StringBuilder builder = new StringBuilder();
         for (char letter : input.toLowerCase().toCharArray()) {
             builder.append(Pattern.quote(String.valueOf(letter))).append("(?:.*)");
         }
-
         Pattern pattern = Pattern.compile(builder.toString());
-        return new ArrayList<>(results.stream()
-            .filter(orig -> {
-                TimedMatcher matcher = TimedMatcher.create(pattern, orig.toLowerCase(), EngineConfig.TAB_COMPLETER_REGEX_TIMEOUT.get());
-                return matcher.find();
-                //pattern.matcher(orig.toLowerCase()).find()
-            })
-            .sorted(String::compareTo)
-            .toList());
+        return new ArrayList<>(results.stream().filter(orig -> {
+            TimedMatcher matcher = TimedMatcher.create(pattern, orig.toLowerCase(), EngineConfig.TAB_COMPLETER_REGEX_TIMEOUT.get());
+            return matcher.find();
+            //pattern.matcher(orig.toLowerCase()).find()
+        }).sorted(String::compareTo).toList());
     }
 
     @NotNull
     private static List<String> copyPartialMatches(@NotNull String token, @NotNull Collection<String> originals) {
         List<String> collection = new ArrayList<>();
-
         for (String string : originals) {
             if (startsWithIgnoreCase(string, token)) {
                 collection.add(string);
             }
         }
-
         return collection;
     }
 
@@ -350,12 +335,10 @@ public class StringUtil {
     @NotNull
     public static String extractCommandName(@NotNull String command) {
         String commandName = Colorizer.strip(command).split(" ")[0].substring(1);
-
         String[] pluginPrefix = commandName.split(":");
         if (pluginPrefix.length == 2) {
             commandName = pluginPrefix[1];
         }
-
         return commandName;
     }
 }

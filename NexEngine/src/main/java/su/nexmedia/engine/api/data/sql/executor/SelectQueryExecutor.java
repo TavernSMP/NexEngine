@@ -1,10 +1,5 @@
 package su.nexmedia.engine.api.data.sql.executor;
 
-import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.data.connection.AbstractDataConnector;
-import su.nexmedia.engine.api.data.sql.*;
-import su.nexmedia.engine.api.data.sql.column.ColumnType;
-
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,13 +7,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.data.connection.AbstractDataConnector;
+import su.nexmedia.engine.api.data.sql.*;
+import su.nexmedia.engine.api.data.sql.column.ColumnType;
 
 public final class SelectQueryExecutor<T> extends SQLExecutor<List<T>> {
 
-    private final List<SQLColumn>        columns;
-    private final List<SQLCondition>     wheres;
+    private final List<SQLColumn> columns;
+
+    private final List<SQLCondition> wheres;
+
     private final Function<ResultSet, T> dataFunction;
-    private       int                    amount;
+
+    private int amount;
 
     private SelectQueryExecutor(@NotNull String table, @NotNull Function<ResultSet, T> dataFunction) {
         super(table);
@@ -45,8 +47,9 @@ public final class SelectQueryExecutor<T> extends SQLExecutor<List<T>> {
 
     @NotNull
     public SelectQueryExecutor<T> columns(@NotNull List<SQLColumn> columns) {
-        if (columns.isEmpty()) return this.all();
-
+        if (columns.isEmpty()) {
+            return this.all();
+        }
         this.columns.clear();
         this.columns.addAll(columns);
         return this;
@@ -73,16 +76,14 @@ public final class SelectQueryExecutor<T> extends SQLExecutor<List<T>> {
     @Override
     @NotNull
     public List<T> execute(@NotNull AbstractDataConnector connector) {
-        if (this.columns.isEmpty()) return Collections.emptyList();
-
+        if (this.columns.isEmpty()) {
+            return Collections.emptyList();
+        }
         String columns = this.columns.stream().map(SQLColumn::getNameEscaped).collect(Collectors.joining(","));
-        String wheres = this.wheres.stream().map(where -> where.getValue().getColumn().getNameEscaped() + " " + where.getType().getOperator() + " ?")
-            .collect(Collectors.joining(" AND "));
+        String wheres = this.wheres.stream().map(where -> where.getValue().getColumn().getNameEscaped() + " " + where.getType().getOperator() + " ?").collect(Collectors.joining(" AND "));
         String sql = "SELECT " + columns + " FROM " + this.getTable() + (wheres.isEmpty() ? "" : " WHERE " + wheres);
-
         //List<String> values2 = this.columns.stream().map(SQLColumn::getName).toList();
         List<String> whers2 = this.wheres.stream().map(SQLCondition::getValue).map(SQLValue::getValue).toList();
-
         return SQLQueries.executeQuery(connector, sql, whers2, this.dataFunction, this.amount);
     }
 }

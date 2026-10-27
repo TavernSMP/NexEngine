@@ -1,0 +1,67 @@
+{
+  "artifact": "NexEngine-2.2.12-tavern.26.3.1.jar",
+  "sha256": "da79eeb42f9b2e0b049b45d9cfee1a3fe6e98ac5a39679385e871f5155d9d128",
+  "upstream": "https://github.com/nulli0n/NexEngine-spigot",
+  "upstream_base": "cf39cf5bdb0257aba153c0a89d86e13caa5997f3",
+  "complete_source_build": true,
+  "normal_build_requires_original_nexengine_jar": false,
+  "offline_tests_passed": 4,
+  "standalone_source_build_passed_without_original_or_server_jars": true,
+  "standalone_tests_passed": 3,
+  "standalone_original_jar_comparison_skipped": 1,
+  "runtime_tested_payload_matches_final_jar": true,
+  "engine_source_files": 123,
+  "public_protected_apis_checked": 123,
+  "permitted_api_addition": "Version.V26_3",
+  "default_resources_byte_identical": [
+    "config.yml",
+    "lang/messages_cn.yml",
+    "lang/messages_ru.yml"
+  ],
+  "all_classes_target_java_25": true,
+  "removed_compiler_generated_class": [
+    "su/nexmedia/engine/api/lang/LangMessage$1.class"
+  ],
+  "original_configs_data_unchanged": 170,
+  "original_player_rows_unchanged": 21925,
+  "database_schema_unchanged": true,
+  "runtime_checkpoints": {
+    "first": [
+      "all-three-enabled",
+      "version-26.3",
+      "35-existing-crates",
+      "4-existing-rarities",
+      "all-existing-items-roundtrip",
+      "skull-texture-roundtrip",
+      "test-client-online",
+      "player-command-start",
+      "player-command-extend",
+      "existing-preview-gui",
+      "synthetic-crate-load",
+      "real-crate-opening",
+      "actual-reward-delivery",
+      "opening-counter-increment",
+      "client-online-after-reload",
+      "reload-keeps-stack-enabled",
+      "reenforcement-after-crates-reload",
+      "stop-restores-weights",
+      "scheduled-expiry",
+      "persist-active-for-restart"
+    ],
+    "second": [
+      "all-three-enabled",
+      "version-26.3",
+      "35-existing-crates",
+      "4-existing-rarities",
+      "all-existing-items-roundtrip",
+      "skull-texture-roundtrip",
+      "process-restart-resumed-boost",
+      "process-restart-reapplied-weights",
+      "test-client-online",
+      "persisted-synthetic-openings",
+      "restart-stop-restored"
+    ]
+  },
+  "reward_previews": 1092,
+  "reward_items": 306
+}

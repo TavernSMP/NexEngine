@@ -1,5 +1,7 @@
 package su.nexmedia.engine.command.list;
 
+import static su.nexmedia.engine.utils.Colors2.*;
+import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +15,10 @@ import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerUtil;
 
-import java.util.List;
-
-import static su.nexmedia.engine.utils.Colors2.*;
-
 public class CheckPermCommand extends AbstractCommand<NexEngine> {
 
     public CheckPermCommand(@NotNull NexEngine plugin) {
-        super(plugin, new String[]{"checkperm"}, EnginePerms.COMMAND_CHECK_PERM);
+        super(plugin, new String[] { "checkperm" }, EnginePerms.COMMAND_CHECK_PERM);
         this.setDescription(plugin.getMessage(EngineLang.COMMAND_CHECKPERM_DESC));
         this.setUsage(plugin.getMessage(EngineLang.COMMAND_CHECKPERM_USAGE));
     }
@@ -40,13 +38,11 @@ public class CheckPermCommand extends AbstractCommand<NexEngine> {
             this.printUsage(sender);
             return;
         }
-
         Player player = PlayerUtil.getPlayer(result.getArg(1));
         if (player == null) {
             this.errorPlayer(sender);
             return;
         }
-
         sender.sendMessage(LIGHT_YELLOW + BOLD + "Permissions report for " + LIGHT_ORANGE + player.getName() + ":");
         sender.sendMessage(LIGHT_ORANGE + "▪ " + LIGHT_YELLOW + "Primary Group: " + LIGHT_ORANGE + Colorizer.plain(VaultHook.getPermissionGroup(player)));
         sender.sendMessage(LIGHT_ORANGE + "▪ " + LIGHT_YELLOW + "All Groups: " + LIGHT_ORANGE + Colorizer.plain(String.join(", ", VaultHook.getPermissionGroups(player))));

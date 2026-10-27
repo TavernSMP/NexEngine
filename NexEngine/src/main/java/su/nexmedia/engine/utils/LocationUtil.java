@@ -1,5 +1,9 @@
 package su.nexmedia.engine.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -7,18 +11,14 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-
 public class LocationUtil {
 
     @Nullable
     public static String serialize(@NotNull Location loc) {
         World world = loc.getWorld();
-        if (world == null) return null;
-
+        if (world == null) {
+            return null;
+        }
         return loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getPitch() + "," + loc.getYaw() + "," + world.getName();
     }
 
@@ -30,20 +30,19 @@ public class LocationUtil {
     @Nullable
     public static Location deserialize(@NotNull String raw) {
         String[] split = raw.split(",");
-        if (split.length != 6) return null;
-
+        if (split.length != 6) {
+            return null;
+        }
         World world = Bukkit.getWorld(split[5]);
         if (world == null) {
             EngineUtils.ENGINE.error("Invalid/Unloaded world for: '" + raw + "' location!");
             return null;
         }
-
         double x = StringUtil.getDouble(split[0], 0, true);
         double y = StringUtil.getDouble(split[1], 0, true);
         double z = StringUtil.getDouble(split[2], 0, true);
         float pitch = (float) StringUtil.getDouble(split[3], 0, true);
         float yaw = (float) StringUtil.getDouble(split[4], 0, true);
-
         return new Location(world, x, y, z, yaw, pitch);
     }
 

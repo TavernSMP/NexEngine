@@ -1,17 +1,18 @@
 package su.nexmedia.engine.api.manager;
 
+import java.io.File;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.utils.StringUtil;
 
-import java.io.File;
-
 public abstract class AbstractConfigHolder<P extends NexPlugin<P>> {
 
-    protected final P      plugin;
-    protected final JYML   cfg;
-    private final   String id;
+    protected final P plugin;
+
+    protected final JYML cfg;
+
+    private final String id;
 
     public AbstractConfigHolder(@NotNull P plugin, @NotNull String filePath) {
         this(plugin, new JYML(new File(filePath)));

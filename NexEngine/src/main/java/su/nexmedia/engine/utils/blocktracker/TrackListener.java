@@ -76,7 +76,9 @@ public class TrackListener<P extends NexPlugin<P>> extends AbstractListener<P> {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onFade(BlockFadeEvent event) {
-        if (event.getBlock().getBlockData() instanceof Lightable) return;
+        if (event.getBlock().getBlockData() instanceof Lightable) {
+            return;
+        }
         PlayerBlockTracker.unTrack(event.getBlock());
     }
 
@@ -97,7 +99,9 @@ public class TrackListener<P extends NexPlugin<P>> extends AbstractListener<P> {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onStructureGrow(StructureGrowEvent e) {
-        if (e.getPlayer() == null) return;
+        if (e.getPlayer() == null) {
+            return;
+        }
         PlayerBlockTracker.track(e.getBlocks().stream().map(BlockState::getBlock).toList());
     }
 
@@ -132,11 +136,13 @@ public class TrackListener<P extends NexPlugin<P>> extends AbstractListener<P> {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFallingSpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
-        if (!(entity instanceof FallingBlock)) return;
-
+        if (!(entity instanceof FallingBlock)) {
+            return;
+        }
         Block block = entity.getLocation().getBlock();
-        if (!PlayerBlockTracker.isTracked(block)) return;
-
+        if (!PlayerBlockTracker.isTracked(block)) {
+            return;
+        }
         entity.setMetadata(META_TRACK_FALLING_BLOCK, new FixedMetadataValue(plugin, true));
         PlayerBlockTracker.unTrack(block);
     }
@@ -144,8 +150,9 @@ public class TrackListener<P extends NexPlugin<P>> extends AbstractListener<P> {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFallingLand(EntityChangeBlockEvent event) {
         Entity entity = event.getEntity();
-        if (!entity.hasMetadata(META_TRACK_FALLING_BLOCK)) return;
-
+        if (!entity.hasMetadata(META_TRACK_FALLING_BLOCK)) {
+            return;
+        }
         PlayerBlockTracker.trackForce(event.getBlock());
     }
 }

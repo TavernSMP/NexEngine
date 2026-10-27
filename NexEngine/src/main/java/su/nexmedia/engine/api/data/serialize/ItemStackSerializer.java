@@ -1,10 +1,9 @@
 package su.nexmedia.engine.api.data.serialize;
 
 import com.google.gson.*;
+import java.lang.reflect.Type;
 import org.bukkit.inventory.ItemStack;
 import su.nexmedia.engine.utils.ItemUtil;
-
-import java.lang.reflect.Type;
 
 public class ItemStackSerializer implements JsonSerializer<ItemStack>, JsonDeserializer<ItemStack> {
 
@@ -20,5 +19,4 @@ public class ItemStackSerializer implements JsonSerializer<ItemStack>, JsonDeser
         JsonObject object = json.getAsJsonObject();
         return ItemUtil.decompress(object.get("data64").getAsString());
     }
-
 }

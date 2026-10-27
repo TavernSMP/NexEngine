@@ -3,3 +3,7 @@
 /NexEngine.jar
 /NexEngine/target/
 /NexEngine/pom.xml.versionsBackup
+/.gradle/
+/build/
+/evidence/
+/output/

@@ -1,13 +1,12 @@
 package su.nexmedia.engine.utils;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Reflex {
 
@@ -22,8 +21,7 @@ public class Reflex {
     private static Class<?> getClass(@NotNull String path) {
         try {
             return Class.forName(path);
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return null;
         }
@@ -34,8 +32,7 @@ public class Reflex {
             Constructor<?> constructor = clazz.getDeclaredConstructor(types);
             constructor.setAccessible(true);
             return constructor;
-        }
-        catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
         return null;
@@ -44,8 +41,7 @@ public class Reflex {
     public static Object invokeConstructor(@NotNull Constructor<?> constructor, Object... obj) {
         try {
             return constructor.newInstance(obj);
-        }
-        catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
         return obj;
@@ -54,48 +50,47 @@ public class Reflex {
     @NotNull
     public static <T> List<T> getFields(@NotNull Class<?> clazz, @NotNull Class<T> type) {
         List<T> list = new ArrayList<>();
-
         for (Field field : Reflex.getFields(clazz)) {
-            if (!field.getDeclaringClass().equals(clazz)) continue;
-            if (!Modifier.isStatic(field.getModifiers())) continue;
-            if (!Modifier.isFinal(field.getModifiers())) continue;
-            if (!type.isAssignableFrom(field.getType())) continue;
-
-            //T langText;
+            if (!field.getDeclaringClass().equals(clazz)) {
+                continue;
+            }
+            if (!Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            if (!Modifier.isFinal(field.getModifiers())) {
+                continue;
+            }
+            if (!type.isAssignableFrom(field.getType())) {
+                continue;
+            }
             try {
                 list.add(type.cast(field.get(null)));
-            }
-            catch (IllegalArgumentException | IllegalAccessException exception) {
+            } catch (IllegalArgumentException | IllegalAccessException exception) {
                 exception.printStackTrace();
             }
         }
-
         return list;
     }
 
     @NotNull
     public static List<Field> getFields(@NotNull Class<?> type) {
         List<Field> result = new ArrayList<>();
-
         Class<?> clazz = type;
         while (clazz != null && clazz != Object.class) {
             if (!result.isEmpty()) {
                 result.addAll(0, Arrays.asList(clazz.getDeclaredFields()));
-            }
-            else {
+            } else {
                 Collections.addAll(result, clazz.getDeclaredFields());
             }
             clazz = clazz.getSuperclass();
         }
-
         return result;
     }
 
     public static Field getField(@NotNull Class<?> clazz, @NotNull String fieldName) {
         try {
             return clazz.getDeclaredField(fieldName);
-        }
-        catch (NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             Class<?> superClass = clazz.getSuperclass();
             return superClass == null ? null : getField(superClass, fieldName);
         }
@@ -105,12 +100,12 @@ public class Reflex {
         try {
             Class<?> clazz = from instanceof Class<?> ? (Class<?>) from : from.getClass();
             Field field = getField(clazz, fieldName);
-            if (field == null) return null;
-
+            if (field == null) {
+                return null;
+            }
             field.setAccessible(true);
             return field.get(from);
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         return null;
@@ -120,15 +115,14 @@ public class Reflex {
         try {
             boolean isStatic = of instanceof Class;
             Class<?> clazz = isStatic ? (Class<?>) of : of.getClass();
-
             Field field = getField(clazz, fieldName);
-            if (field == null) return false;
-
+            if (field == null) {
+                return false;
+            }
             field.setAccessible(true);
             field.set(isStatic ? null : of, value);
             return true;
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         return false;
@@ -137,8 +131,7 @@ public class Reflex {
     public static Method getMethod(@NotNull Class<?> clazz, @NotNull String fieldName, @NotNull Class<?>... o) {
         try {
             return clazz.getDeclaredMethod(fieldName, o);
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             Class<?> superClass = clazz.getSuperclass();
             return superClass == null ? null : getMethod(superClass, fieldName);
         }
@@ -148,8 +141,7 @@ public class Reflex {
         method.setAccessible(true);
         try {
             return method.invoke(by, param);
-        }
-        catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;

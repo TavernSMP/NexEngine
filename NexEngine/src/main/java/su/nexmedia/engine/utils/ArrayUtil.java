@@ -11,7 +11,6 @@ public class ArrayUtil {
             if (startIndex < 0) {
                 startIndex = 0;
             }
-
             int i;
             if (objectToFind == null) {
                 for (i = startIndex; i < array.length; ++i) {
@@ -19,15 +18,13 @@ public class ArrayUtil {
                         return i;
                     }
                 }
-            }
-            else if (array.getClass().getComponentType().isInstance(objectToFind)) {
+            } else if (array.getClass().getComponentType().isInstance(objectToFind)) {
                 for (i = startIndex; i < array.length; ++i) {
                     if (objectToFind.equals(array[i])) {
                         return i;
                     }
                 }
             }
-
         }
         return -1;
     }
@@ -45,13 +42,11 @@ public class ArrayUtil {
             if (startIndex < 0) {
                 startIndex = 0;
             }
-
             for (int i = startIndex; i < array.length; ++i) {
                 if (valueToFind == array[i]) {
                     return i;
                 }
             }
-
         }
         return -1;
     }
@@ -69,13 +64,11 @@ public class ArrayUtil {
             if (startIndex < 0) {
                 startIndex = 0;
             }
-
             for (int i = startIndex; i < array.length; ++i) {
                 if (valueToFind == array[i]) {
                     return i;
                 }
             }
-
         }
         return -1;
     }
@@ -89,13 +82,11 @@ public class ArrayUtil {
             if (startIndex < 0) {
                 startIndex = 0;
             }
-
             for (int i = startIndex; i < array.length; ++i) {
                 if (valueToFind == array[i]) {
                     return i;
                 }
             }
-
         }
         return -1;
     }

@@ -1,5 +1,9 @@
 package su.nexmedia.engine.utils;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.BlockFace;
@@ -11,11 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 public class EntityUtil {
+
+    public static final AtomicInteger ENTITY_COUNTER = new AtomicInteger(Integer.MIN_VALUE / 2);
 
     @Deprecated
     public static boolean isNPC(@NotNull Entity entity) {
@@ -40,8 +42,9 @@ public class EntityUtil {
     @NotNull
     public static Map<EquipmentSlot, ItemStack> getEquippedItems(@NotNull LivingEntity entity, @NotNull EquipmentSlot... slots) {
         EntityEquipment equipment = entity.getEquipment();
-        if (equipment == null) return Collections.emptyMap();
-
+        if (equipment == null) {
+            return Collections.emptyMap();
+        }
         Map<EquipmentSlot, ItemStack> map = new HashMap<>();
         for (EquipmentSlot slot : slots) {
             map.put(slot, equipment.getItem(slot));
@@ -62,7 +65,6 @@ public class EntityUtil {
     @Nullable
     public static BlockFace getDirection(@NotNull Entity entity) {
         float yaw = Math.round(entity.getLocation().getYaw() / 90F);
-
         if ((yaw == -4.0F) || (yaw == 0.0F) || (yaw == 4.0F)) {
             return BlockFace.SOUTH;
         }

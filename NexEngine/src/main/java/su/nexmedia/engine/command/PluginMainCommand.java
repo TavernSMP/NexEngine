@@ -14,6 +14,5 @@ public class PluginMainCommand<P extends NexPlugin<P>> extends GeneralCommand<P>
 
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-
     }
 }

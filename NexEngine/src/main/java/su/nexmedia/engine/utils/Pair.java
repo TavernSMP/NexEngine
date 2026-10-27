@@ -1,13 +1,13 @@
 package su.nexmedia.engine.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
 
 public class Pair<F, S> {
 
     private final F first;
+
     private final S second;
 
     public Pair(@NotNull F first, @NotNull S second) {

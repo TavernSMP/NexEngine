@@ -6,24 +6,24 @@ import su.nexmedia.engine.utils.StringUtil;
 
 public enum Version {
 
-    // KEEP VERSIONS LIST FROM SMALLER TO GREATER
     V1_17_R1("1.17.1", true),
     V1_18_R2("1.18.2"),
-    @Deprecated V1_19_R1("1.19.2", true),
-    @Deprecated V1_19_R2("1.19.3", true),
+    @Deprecated
+    V1_19_R1("1.19.2", true),
+    @Deprecated
+    V1_19_R2("1.19.3", true),
     V1_19_R3("1.19.4"),
     V1_20_R1("1.20.1", true),
     V1_20_R2("1.20.2"),
     V1_20_R3("1.20.4"),
-    UNKNOWN("Unknown", true),
-    // API-Version in plugin.yml won't allow to load this on lower version, so
-    // assume any other version not listed here is newer one.
-    ;
+    V26_3("26.3"),
+    UNKNOWN("Unknown", true);
 
     private static Version current;
 
     private final boolean deprecated;
-    private final String  localized;
+
+    private final String localized;
 
     Version(@NotNull String localized) {
         this(localized, false);
@@ -36,6 +36,9 @@ public enum Version {
 
     @NotNull
     public static String getProtocol() {
+        if (Bukkit.getMinecraftVersion().equals("26.3")) {
+            return "v26_3";
+        }
         String[] split = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
         return split[split.length - 1];
     }
@@ -49,12 +52,12 @@ public enum Version {
     }
 
     public boolean isDeprecated() {
-        return deprecated;
+        return this.deprecated;
     }
 
     @NotNull
     public String getLocalized() {
-        return localized;
+        return this.localized;
     }
 
     public boolean isLower(@NotNull Version version) {
@@ -78,6 +81,6 @@ public enum Version {
     }
 
     public boolean isCurrent() {
-        return this == Version.getCurrent();
+        return this == getCurrent();
     }
 }

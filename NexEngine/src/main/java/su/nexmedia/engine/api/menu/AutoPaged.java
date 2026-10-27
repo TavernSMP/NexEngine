@@ -1,5 +1,7 @@
 package su.nexmedia.engine.api.menu;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -8,32 +10,29 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface AutoPaged<I> {
 
     int[] getObjectSlots();
 
-    @NotNull List<I> getObjects(@NotNull Player player);
+    @NotNull
+    List<I> getObjects(@NotNull Player player);
 
-    @NotNull ItemStack getObjectStack(@NotNull Player player, @NotNull I object);
+    @NotNull
+    ItemStack getObjectStack(@NotNull Player player, @NotNull I object);
 
-    @NotNull ItemClick getObjectClick(@NotNull I object);
+    @NotNull
+    ItemClick getObjectClick(@NotNull I object);
 
     @NotNull
     default List<MenuItem> getItemsForPage(@NotNull MenuViewer viewer) {
         Player player = viewer.getPlayer();
         List<MenuItem> items = new ArrayList<>();
         List<I> origin = this.getObjects(player);
-
         int limit = this.getObjectSlots().length;
         int pages = (int) Math.ceil((double) origin.size() / (double) limit);
         viewer.setPages(pages);
         viewer.finePage();
-
         int skip = (viewer.getPage() - 1) * limit;
-
         List<I> list = new ArrayList<>(origin.stream().skip(skip).limit(limit).toList());
         int count = 0;
         for (I object : list) {
@@ -43,7 +42,6 @@ public interface AutoPaged<I> {
             menuItem.setClick(this.getObjectClick(object));
             items.add(menuItem);
         }
-
         return items;
     }
 }

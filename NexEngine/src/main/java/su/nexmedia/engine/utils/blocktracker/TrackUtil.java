@@ -24,5 +24,4 @@ public class TrackUtil {
         final int relY = block.getY();
         return (relY & 0xFFFF) | ((relX & 0xFF) << 16) | ((relZ & 0xFF) << 24);
     }
-
 }

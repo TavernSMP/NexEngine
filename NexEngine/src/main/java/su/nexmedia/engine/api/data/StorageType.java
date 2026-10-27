@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 public enum StorageType {
 
-    MYSQL("MySQL"), SQLITE("SQLite"),
-    ;
+    MYSQL("MySQL"),
+    SQLITE("SQLite");
 
     private final String name;
 

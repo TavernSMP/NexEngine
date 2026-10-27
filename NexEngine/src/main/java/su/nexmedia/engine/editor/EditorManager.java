@@ -1,5 +1,8 @@
 package su.nexmedia.engine.editor;
 
+import static su.nexmedia.engine.utils.Colors2.*;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,20 +19,19 @@ import su.nexmedia.engine.utils.Pair;
 import su.nexmedia.engine.utils.message.NexComponent;
 import su.nexmedia.engine.utils.message.NexMessage;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static su.nexmedia.engine.utils.Colors2.*;
-
 public class EditorManager extends AbstractManager<NexEngine> {
 
-    private static final Map<Player, Pair<Menu<?>, Integer>> CACHE_MENU   = new WeakHashMap<>();
-    private static final Map<Player, InputHandler>           CACHE_INPUT  = new WeakHashMap<>();
-    private static final Map<Player, List<String>>           CACHE_VALUES = new WeakHashMap<>();
+    private static final Map<Player, Pair<Menu<?>, Integer>> CACHE_MENU = new WeakHashMap<>();
 
-    public static final String EXIT       = "#exit";
-    static final String VALUES     = "#values";
-    static final int    TITLE_STAY = Short.MAX_VALUE;
+    private static final Map<Player, InputHandler> CACHE_INPUT = new WeakHashMap<>();
+
+    private static final Map<Player, List<String>> CACHE_VALUES = new WeakHashMap<>();
+
+    public static final String EXIT = "#exit";
+
+    static final String VALUES = "#values";
+
+    static final int TITLE_STAY = Short.MAX_VALUE;
 
     public EditorManager(@NotNull NexEngine plugin) {
         super(plugin);
@@ -58,7 +60,6 @@ public class EditorManager extends AbstractManager<NexEngine> {
 
     public static void startEdit(@NotNull Player player, @NotNull InputHandler handler) {
         CACHE_INPUT.put(player, handler);
-
         Menu<?> menu = Menu.getMenu(player);
         if (menu != null) {
             MenuViewer viewer = menu.getViewer(player);
@@ -80,50 +81,55 @@ public class EditorManager extends AbstractManager<NexEngine> {
             }
         }
         CACHE_VALUES.remove(player);
-
         player.sendTitle(EngineUtils.ENGINE.getMessage(EngineLang.EDITOR_TITLE_DONE).getLocalized(), "", 10, 40, 10);
     }
 
     public static void suggestValues(@NotNull Player player, @NotNull Collection<String> values, boolean autoRun) {
         List<String> items = values.stream().sorted(String::compareTo).collect(Collectors.toCollection(ArrayList::new));
-
         CACHE_VALUES.put(player, items);
         displayValues(player, autoRun, 1);
     }
 
     public static void displayValues(@NotNull Player player, boolean autoRun, int page) {
         List<String> values = CACHE_VALUES.get(player);
-        if (values == null || values.isEmpty()) return;
-
+        if (values == null || values.isEmpty()) {
+            return;
+        }
         int perPage = 10;
         int pages = (int) Math.ceil((double) values.size() / (double) perPage);
-        if (page < 1) page = 1;
-        else if (page > pages) page = pages;
+        if (page < 1) {
+            page = 1;
+        } else if (page > pages) {
+            page = pages;
+        }
         int skip = (page - 1) * perPage;
-
         boolean isLastPage = page == pages;
         boolean isFirstPage = page == 1;
         boolean fixCommand = Version.isAbove(Version.V1_18_R2);
         String prefix = DARK_GRAY + "> ";
         String header = ORANGE + "=".repeat(8) + "[ " + YELLOW + "Value Helper" + ORANGE + " ]" + "=".repeat(8);
         String footer = ORANGE + "=".repeat(9) + GRAY + " [<] " + YELLOW + page + ORANGE + "/" + YELLOW + pages + GRAY + " [>] " + ORANGE + "=".repeat(9);
-
         List<String> items = new ArrayList<>(values.stream().skip(skip).limit(perPage).toList());
         List<String> prefixed = items.stream().map(str -> prefix + str).toList();
-
         NexMessage message = new NexMessage(String.join("\n", prefixed) + "\n" + footer);
         items.forEach(item -> {
             NexComponent component = message.addComponent(Colorizer.strip(item), GREEN + item);
             component.showText(GRAY + "Click me to select " + CYAN + item);
-
-            if (autoRun && fixCommand && !item.startsWith("/")) item = "/" + item;
-
-            if (autoRun) component.runCommand(Colorizer.strip(item));
-            else component.suggestCommand(Colorizer.strip(item));
+            if (autoRun && fixCommand && !item.startsWith("/")) {
+                item = "/" + item;
+            }
+            if (autoRun) {
+                component.runCommand(Colorizer.strip(item));
+            } else {
+                component.suggestCommand(Colorizer.strip(item));
+            }
         });
-        if (!isFirstPage) message.addComponent("[<]", LIGHT_RED + "[<]").showText(GRAY + "Previous Page").runCommand("/" + VALUES + " " + (page - 1) + " " + autoRun);
-        if (!isLastPage) message.addComponent("[>]", LIGHT_RED + "[>]").showText(GRAY + "Next Page").runCommand("/" + VALUES + " " + (page + 1) + " " + autoRun);
-
+        if (!isFirstPage) {
+            message.addComponent("[<]", LIGHT_RED + "[<]").showText(GRAY + "Previous Page").runCommand("/" + VALUES + " " + (page - 1) + " " + autoRun);
+        }
+        if (!isLastPage) {
+            message.addComponent("[>]", LIGHT_RED + "[>]").showText(GRAY + "Next Page").runCommand("/" + VALUES + " " + (page + 1) + " " + autoRun);
+        }
         player.sendMessage(Colorizer.hex(header));
         message.send(player);
     }

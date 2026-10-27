@@ -1,11 +1,10 @@
 package su.nexmedia.engine.api.menu.click;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.menu.impl.Menu;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ClickHandler<E extends Enum<E>> {
 

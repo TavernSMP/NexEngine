@@ -6,9 +6,11 @@ import su.nexmedia.engine.api.data.sql.column.ColumnType;
 
 public class SQLColumn {
 
-    private final String     name;
+    private final String name;
+
     private final ColumnType type;
-    private final int        length;
+
+    private final int length;
 
     public SQLColumn(@NotNull String name, @NotNull ColumnType type, int length) {
         this.name = name.replace(" ", "_");
@@ -38,8 +40,9 @@ public class SQLColumn {
 
     @NotNull
     public String getNameEscaped() {
-        if (this.getName().startsWith("LOWER(")) return this.getName();
-
+        if (this.getName().startsWith("LOWER(")) {
+            return this.getName();
+        }
         return this.getName().equalsIgnoreCase("*") ? this.getName() : "`" + this.getName() + "`";
     }
 

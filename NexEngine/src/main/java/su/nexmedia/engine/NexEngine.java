@@ -1,5 +1,7 @@
 package su.nexmedia.engine;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.command.GeneralCommand;
 import su.nexmedia.engine.api.editor.EditorLocales;
@@ -15,15 +17,14 @@ import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.Placeholders;
 import su.nexmedia.engine.utils.blocktracker.PlayerBlockTracker;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class NexEngine extends NexPlugin<NexEngine> {
 
     private final Set<NexPlugin<?>> childrens = new HashSet<>();
 
     private EditorManager editorManager;
+
     private MenuListener menuListener;
+
     private MenuRefreshTask menuRefreshTask;
 
     @Override
@@ -36,20 +37,23 @@ public class NexEngine extends NexPlugin<NexEngine> {
     public void enable() {
         this.menuListener = new MenuListener(this);
         this.menuListener.registerListeners();
-
         this.menuRefreshTask = new MenuRefreshTask(this);
         this.menuRefreshTask.start();
-
         this.editorManager = new EditorManager(this);
         this.editorManager.setup();
     }
 
     @Override
     public void disable() {
-        if (this.editorManager != null) this.editorManager.shutdown();
-        if (this.menuListener != null) this.menuListener.unregisterListeners();
-        if (this.menuRefreshTask != null) this.menuRefreshTask.stop();
-
+        if (this.editorManager != null) {
+            this.editorManager.shutdown();
+        }
+        if (this.menuListener != null) {
+            this.menuListener.unregisterListeners();
+        }
+        if (this.menuRefreshTask != null) {
+            this.menuRefreshTask.stop();
+        }
         if (EngineUtils.hasVault()) {
             VaultHook.shutdown();
         }
@@ -66,7 +70,6 @@ public class NexEngine extends NexPlugin<NexEngine> {
     @Override
     public void registerCommands(@NotNull GeneralCommand<NexEngine> mainCommand) {
         mainCommand.addChildren(new ReloadSubCommand<>(this, Placeholders.WILDCARD));
-
         if (EngineUtils.hasVault() && VaultHook.hasPermissions()) {
             mainCommand.addChildren(new CheckPermCommand(this));
         }
@@ -74,7 +77,6 @@ public class NexEngine extends NexPlugin<NexEngine> {
 
     @Override
     public void registerPermissions() {
-
     }
 
     @Override

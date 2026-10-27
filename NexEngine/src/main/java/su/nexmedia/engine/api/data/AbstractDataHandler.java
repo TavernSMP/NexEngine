@@ -2,6 +2,14 @@ package su.nexmedia.engine.api.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.NexPlugin;
@@ -19,22 +27,16 @@ import su.nexmedia.engine.api.data.task.DataSaveTask;
 import su.nexmedia.engine.api.data.task.DataSynchronizationTask;
 import su.nexmedia.engine.api.manager.AbstractManager;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
 public abstract class AbstractDataHandler<P extends NexPlugin<P>> extends AbstractManager<P> {
 
     protected final DataConfig config;
+
     protected final AbstractDataConnector connector;
+
     protected Gson gson;
 
     private DataSynchronizationTask<P> synchronizationTask;
+
     private DataSaveTask<P> saveTask;
 
     protected AbstractDataHandler(@NotNull P plugin) {
@@ -43,12 +45,10 @@ public abstract class AbstractDataHandler<P extends NexPlugin<P>> extends Abstra
 
     protected AbstractDataHandler(@NotNull P plugin, @NotNull DataConfig config) {
         super(plugin);
-
         this.config = config;
         if (this.getDataType() == StorageType.MYSQL) {
             this.connector = new ConnectorMySQL(plugin, config);
-        }
-        else {
+        } else {
             this.connector = new ConnectorSQLite(plugin, config);
         }
     }
@@ -56,13 +56,11 @@ public abstract class AbstractDataHandler<P extends NexPlugin<P>> extends Abstra
     @Override
     protected void onLoad() {
         this.gson = this.registerAdapters(new GsonBuilder().setPrettyPrinting()).create();
-
         if (this.config != null) {
             if (this.getConfig().saveInterval > 0) {
                 this.saveTask = new DataSaveTask<>(this);
                 this.saveTask.start();
             }
-
             if (this.getConfig().syncInterval > 0) {
                 if (this.getDataType() != StorageType.SQLITE) {
                     this.synchronizationTask = new DataSynchronizationTask<>(this);
@@ -70,7 +68,6 @@ public abstract class AbstractDataHandler<P extends NexPlugin<P>> extends Abstra
                     this.plugin.info("Enabled data synchronization with " + config.syncInterval + " seconds interval.");
                 }
             }
-
             if (this.getConfig().purgeEnabled && this.getConfig().purgePeriod > 0) {
                 this.onPurge();
             }
@@ -176,18 +173,13 @@ public abstract class AbstractDataHandler<P extends NexPlugin<P>> extends Abstra
     }
 
     @NotNull
-    public <T> Optional<T> load(@NotNull String table, @NotNull Function<ResultSet, T> function,
-                                @NotNull List<SQLColumn> columns,
-                                @NotNull List<SQLCondition> conditions) {
+    public <T> Optional<T> load(@NotNull String table, @NotNull Function<ResultSet, T> function, @NotNull List<SQLColumn> columns, @NotNull List<SQLCondition> conditions) {
         List<T> list = this.load(table, function, columns, conditions, 1);
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
     @NotNull
-    public <T> List<T> load(@NotNull String table, @NotNull Function<ResultSet, T> dataFunction,
-                            @NotNull List<SQLColumn> columns,
-                            @NotNull List<SQLCondition> conditions,
-                            int amount) {
+    public <T> List<T> load(@NotNull String table, @NotNull Function<ResultSet, T> dataFunction, @NotNull List<SQLColumn> columns, @NotNull List<SQLCondition> conditions, int amount) {
         return SelectQueryExecutor.builder(table, dataFunction).columns(columns).where(conditions).execute(this.getConnector());
     }
 }

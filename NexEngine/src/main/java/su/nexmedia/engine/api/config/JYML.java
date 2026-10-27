@@ -1,5 +1,11 @@
 package su.nexmedia.engine.api.config;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.IntStream;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,17 +26,11 @@ import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.Version;
 import su.nexmedia.engine.utils.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.IntStream;
-
 public class JYML extends YamlConfiguration {
 
-    private final File    file;
-    private       boolean isChanged = false;
+    private final File file;
+
+    private boolean isChanged = false;
 
     public JYML(@NotNull String path, @NotNull String file) {
         this(new File(path, file));
@@ -40,7 +40,6 @@ public class JYML extends YamlConfiguration {
         if (Version.isAbove(Version.V1_17_R1)) {
             this.options().width(1000);
         }
-
         FileUtil.create(file);
         this.file = file;
         this.reload();
@@ -59,14 +58,14 @@ public class JYML extends YamlConfiguration {
         if (!filePath.startsWith("/")) {
             filePath = "/" + filePath;
         }
-
         File file = new File(plugin.getDataFolder() + filePath);
         if (FileUtil.create(file)) {
             try {
                 InputStream input = plugin.getClass().getResourceAsStream(filePath);
-                if (input != null) FileUtil.copy(input, file);
-            }
-            catch (Exception ex) {
+                if (input != null) {
+                    FileUtil.copy(input, file);
+                }
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -90,16 +89,17 @@ public class JYML extends YamlConfiguration {
     public static void initializeOptions(@NotNull Object from, @NotNull JYML cfg) {
         boolean isStatic = from instanceof Class;
         Class<?> clazz = isStatic ? (Class<?>) from : from.getClass();
-
         for (Field field : Reflex.getFields(clazz)) {
-            if (!JOption.class.isAssignableFrom(field.getType())) continue;
-            if (!field.trySetAccessible()) continue;
-
+            if (!JOption.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+            if (!field.trySetAccessible()) {
+                continue;
+            }
             try {
                 JOption<?> option = (JOption<?>) field.get(from);
                 option.read(cfg);
-            }
-            catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
@@ -114,8 +114,7 @@ public class JYML extends YamlConfiguration {
     public void save() {
         try {
             this.save(this.file);
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
@@ -134,15 +133,16 @@ public class JYML extends YamlConfiguration {
             this.load(this.file);
             this.isChanged = false;
             return true;
-        }
-        catch (IOException | InvalidConfigurationException exception) {
+        } catch (IOException | InvalidConfigurationException exception) {
             exception.printStackTrace();
         }
         return false;
     }
 
     public boolean addMissing(@NotNull String path, @Nullable Object val) {
-        if (this.contains(path)) return false;
+        if (this.contains(path)) {
+            return false;
+        }
         this.set(path, val);
         return true;
     }
@@ -151,16 +151,13 @@ public class JYML extends YamlConfiguration {
     public void set(@NotNull String path, @Nullable Object value) {
         if (value instanceof String str) {
             value = Colorizer.plain(str);
-        }
-        else if (value instanceof Collection<?> collection) {
+        } else if (value instanceof Collection<?> collection) {
             List<Object> list = new ArrayList<>(collection);
             list.replaceAll(obj -> obj instanceof String str ? Colorizer.plain(str) : obj);
             value = list;
-        }
-        else if (value instanceof Location location) {
+        } else if (value instanceof Location location) {
             value = LocationUtil.serialize(location);
-        }
-        else if (value instanceof Enum<?> en) {
+        } else if (value instanceof Enum<?> en) {
             value = en.name();
         }
         super.set(path, value);
@@ -177,21 +174,28 @@ public class JYML extends YamlConfiguration {
 
     @Override
     public void setComments(@NotNull String path, @Nullable List<String> comments) {
-        if (Version.isBehind(Version.V1_18_R2)) return;
-        if (this.getComments(path).equals(comments)) return;
-
+        if (Version.isBehind(Version.V1_18_R2)) {
+            return;
+        }
+        if (this.getComments(path).equals(comments)) {
+            return;
+        }
         super.setComments(path, comments);
         this.isChanged = true;
     }
 
     @Override
     public void setInlineComments(@NotNull String path, @Nullable List<String> comments) {
-        if (Version.isBehind(Version.V1_18_R2)) return;
+        if (Version.isBehind(Version.V1_18_R2)) {
+            return;
+        }
         super.setInlineComments(path, comments);
     }
 
     public boolean remove(@NotNull String path) {
-        if (!this.contains(path)) return false;
+        if (!this.contains(path)) {
+            return false;
+        }
         this.set(path, null);
         return true;
     }
@@ -257,8 +261,7 @@ public class JYML extends YamlConfiguration {
 
     @NotNull
     public <T extends Enum<T>> List<T> getEnumList(@NotNull String path, @NotNull Class<T> clazz) {
-        return this.getStringSet(path).stream().map(str -> StringUtil.getEnum(str, clazz).orElse(null))
-            .filter(Objects::nonNull).toList();
+        return this.getStringSet(path).stream().map(str -> StringUtil.getEnum(str, clazz).orElse(null)).filter(Objects::nonNull).toList();
     }
 
     /*@NotNull
@@ -289,7 +292,6 @@ public class JYML extends YamlConfiguration {
 
         return effects;
     }*/
-
     @NotNull
     public ItemStack getItem(@NotNull String path, @Nullable ItemStack def) {
         ItemStack item = this.getItem(path);
@@ -298,66 +300,60 @@ public class JYML extends YamlConfiguration {
 
     @NotNull
     public ItemStack getItem(@NotNull String path) {
-        if (!path.isEmpty() && !path.endsWith(".")) path = path + ".";
-
+        if (!path.isEmpty() && !path.endsWith(".")) {
+            path = path + ".";
+        }
         Material material = Material.getMaterial(this.getString(path + "Material", "").toUpperCase());
-        if (material == null || material == Material.AIR) return new ItemStack(Material.AIR);
-
+        if (material == null || material == Material.AIR) {
+            return new ItemStack(Material.AIR);
+        }
         ItemStack item = new ItemStack(material);
         item.setAmount(this.getInt(path + "Amount", 1));
-
         String headTexture = this.getString(path + "Head_Texture", "");
         if (!headTexture.isEmpty()) {
             ItemUtil.setSkullTexture(item, headTexture);
         }
-
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return item;
-
+        if (meta == null) {
+            return item;
+        }
         int durability = this.getInt(path + "Durability");
         if (durability > 0 && meta instanceof Damageable damageable) {
             damageable.setDamage(durability);
         }
-
         String name = this.getString(path + "Name");
         meta.setDisplayName(name != null ? Colorizer.apply(name) : null);
         meta.setLore(Colorizer.apply(this.getStringList(path + "Lore")));
-
         for (String sKey : this.getSection(path + "Enchants")) {
             Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(sKey.toLowerCase()));
-            if (enchantment == null) continue;
-
+            if (enchantment == null) {
+                continue;
+            }
             int eLvl = this.getInt(path + "Enchants." + sKey);
-            if (eLvl <= 0) continue;
-
+            if (eLvl <= 0) {
+                continue;
+            }
             meta.addEnchant(enchantment, eLvl, true);
         }
-
         int model = this.getInt(path + "Custom_Model_Data");
         meta.setCustomModelData(model != 0 ? model : null);
-
         List<String> flags = this.getStringList(path + "Item_Flags");
         if (flags.contains(Placeholders.WILDCARD)) {
             meta.addItemFlags(ItemFlag.values());
-        }
-        else {
+        } else {
             flags.stream().map(str -> StringUtil.getEnum(str, ItemFlag.class).orElse(null)).filter(Objects::nonNull).forEach(meta::addItemFlags);
         }
-
         String colorRaw = this.getString(path + "Color");
         if (colorRaw != null && !colorRaw.isEmpty()) {
             Color color = StringUtil.parseColor(colorRaw);
             if (meta instanceof LeatherArmorMeta armorMeta) {
                 armorMeta.setColor(color);
-            }
-            else if (meta instanceof PotionMeta potionMeta) {
+            } else if (meta instanceof PotionMeta potionMeta) {
                 potionMeta.setColor(color);
             }
         }
-
         meta.setUnbreakable(this.getBoolean(path + "Unbreakable"));
         item.setItemMeta(meta);
-
         return item;
     }
 
@@ -366,43 +362,38 @@ public class JYML extends YamlConfiguration {
             this.set(path, null);
             return;
         }
-
-        if (!path.endsWith(".")) path = path + ".";
+        if (!path.endsWith(".")) {
+            path = path + ".";
+        }
         this.set(path.substring(0, path.length() - 1), null);
-
         Material material = item.getType();
         this.set(path + "Material", material.name());
         this.set(path + "Amount", item.getAmount() <= 1 ? null : item.getAmount());
         this.set(path + "Head_Texture", ItemUtil.getSkullTexture(item));
-
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-
+        if (meta == null) {
+            return;
+        }
         if (meta instanceof Damageable damageable) {
             this.set(path + "Durability", damageable.getDamage() <= 0 ? null : damageable.getDamage());
         }
-
         this.set(path + "Name", meta.getDisplayName().isEmpty() ? null : meta.getDisplayName());
         this.set(path + "Lore", meta.getLore());
-
         for (Map.Entry<Enchantment, Integer> entry : meta.getEnchants().entrySet()) {
             this.set(path + "Enchants." + entry.getKey().getKey().getKey(), entry.getValue());
         }
         this.set(path + "Custom_Model_Data", meta.hasCustomModelData() ? meta.getCustomModelData() : null);
-
         Color color = null;
         String colorRaw = null;
         if (meta instanceof PotionMeta potionMeta) {
             color = potionMeta.getColor();
-        }
-        else if (meta instanceof LeatherArmorMeta armorMeta) {
+        } else if (meta instanceof LeatherArmorMeta armorMeta) {
             color = armorMeta.getColor();
         }
         if (color != null) {
             colorRaw = color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ",";
         }
         this.set(path + "Color", colorRaw);
-
         List<String> itemFlags = new ArrayList<>(meta.getItemFlags().stream().map(ItemFlag::name).toList());
         this.set(path + "Item_Flags", itemFlags.isEmpty() ? null : itemFlags);
         this.set(path + "Unbreakable", meta.isUnbreakable() ? true : null);
@@ -411,8 +402,9 @@ public class JYML extends YamlConfiguration {
     @Nullable
     public ItemStack getItemEncoded(@NotNull String path) {
         String compressed = this.getString(path);
-        if (compressed == null) return null;
-
+        if (compressed == null) {
+            return null;
+        }
         return ItemUtil.decompress(compressed);
     }
 

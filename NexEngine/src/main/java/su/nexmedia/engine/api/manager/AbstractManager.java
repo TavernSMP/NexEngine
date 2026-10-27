@@ -1,18 +1,19 @@
 package su.nexmedia.engine.api.manager;
 
-import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.NexPlugin;
-import su.nexmedia.engine.utils.values.UniTask;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.NexPlugin;
+import su.nexmedia.engine.utils.values.UniTask;
 
 public abstract class AbstractManager<P extends NexPlugin<P>> {
 
     protected P plugin;
+
     protected final Set<EventListener> listeners;
+
     protected final List<UniTask> tasks;
 
     public AbstractManager(@NotNull P plugin) {

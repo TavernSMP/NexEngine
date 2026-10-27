@@ -1,18 +1,20 @@
 package su.nexmedia.engine.api.menu.impl;
 
+import java.util.function.UnaryOperator;
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.Colorizer;
 
-import java.util.function.UnaryOperator;
-
 public class MenuOptions {
 
     private String title;
+
     private int size;
+
     private InventoryType type;
+
     private int autoRefresh;
 
     private long lastAutoRefresh;
@@ -38,8 +40,7 @@ public class MenuOptions {
         String title = this.getTitle();
         if (this.getType() == InventoryType.CHEST) {
             return Bukkit.getServer().createInventory(null, this.getSize(), title);
-        }
-        else {
+        } else {
             return Bukkit.getServer().createInventory(null, this.getType(), title);
         }
     }
@@ -62,7 +63,9 @@ public class MenuOptions {
     }
 
     public void setSize(int size) {
-        if (size <= 0 || size % 9 != 0 || size > 54) size = 27;
+        if (size <= 0 || size % 9 != 0 || size > 54) {
+            size = 27;
+        }
         this.size = size;
     }
 

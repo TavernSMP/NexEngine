@@ -1,20 +1,21 @@
 package su.nexmedia.engine.utils;
 
-import net.md_5.bungee.api.ChatColor;
-import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.regex.RegexUtil;
-
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.md_5.bungee.api.ChatColor;
+import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.utils.regex.RegexUtil;
 
 public class Colorizer {
 
-    public static final Pattern PATTERN_HEX          = Pattern.compile("#([A-Fa-f0-9]{6})");
+    public static final Pattern PATTERN_HEX = Pattern.compile("#([A-Fa-f0-9]{6})");
+
     public static final Pattern PATTERN_HEX_BRACKETS = Pattern.compile("<#([A-Fa-f0-9]{6})>");
-    public static final Pattern PATTERN_GRADIENT     = Pattern.compile("<gradient:" + PATTERN_HEX.pattern() + ">(.*?)</gradient:" + PATTERN_HEX.pattern() + ">");
+
+    public static final Pattern PATTERN_GRADIENT = Pattern.compile("<gradient:" + PATTERN_HEX.pattern() + ">(.*?)</gradient:" + PATTERN_HEX.pattern() + ">");
 
     @NotNull
     public static String apply(@NotNull String str) {
@@ -48,11 +49,7 @@ public class Colorizer {
         StringBuilder buffer = new StringBuilder(str.length() + 4 * 8);
         while (RegexUtil.matcherFind(matcher)) {
             String group = matcher.group(1);
-            matcher.appendReplacement(buffer,
-                ChatColor.COLOR_CHAR + "x" + ChatColor.COLOR_CHAR + group.charAt(0) +
-                    ChatColor.COLOR_CHAR + group.charAt(1) + ChatColor.COLOR_CHAR + group.charAt(2) +
-                    ChatColor.COLOR_CHAR + group.charAt(3) + ChatColor.COLOR_CHAR + group.charAt(4) +
-                    ChatColor.COLOR_CHAR + group.charAt(5));
+            matcher.appendReplacement(buffer, ChatColor.COLOR_CHAR + "x" + ChatColor.COLOR_CHAR + group.charAt(0) + ChatColor.COLOR_CHAR + group.charAt(1) + ChatColor.COLOR_CHAR + group.charAt(2) + ChatColor.COLOR_CHAR + group.charAt(3) + ChatColor.COLOR_CHAR + group.charAt(4) + ChatColor.COLOR_CHAR + group.charAt(5));
         }
         return matcher.appendTail(buffer).toString();
     }
@@ -61,11 +58,9 @@ public class Colorizer {
         ChatColor[] colors = new ChatColor[length];
         for (int index = 0; index < length; index++) {
             double percent = (double) index / (double) length;
-
             int red = (int) (start.getRed() + percent * (end.getRed() - start.getRed()));
             int green = (int) (start.getGreen() + percent * (end.getGreen() - start.getGreen()));
             int blue = (int) (start.getBlue() + percent * (end.getBlue() - start.getBlue()));
-
             java.awt.Color color = new java.awt.Color(red, green, blue);
             colors[index] = ChatColor.of(color);
         }
@@ -79,11 +74,9 @@ public class Colorizer {
             String start = matcher.group(1);
             String end = matcher.group(3);
             String content = matcher.group(2);
-
             java.awt.Color colorStart = new java.awt.Color(Integer.parseInt(start, 16));
             java.awt.Color colorEnd = new java.awt.Color(Integer.parseInt(end, 16));
             ChatColor[] colors = createGradient(colorStart, colorEnd, Colorizer.strip(content).length());
-
             StringBuilder gradiented = new StringBuilder();
             StringBuilder specialColors = new StringBuilder();
             char[] characters = content.toCharArray();
@@ -93,18 +86,18 @@ public class Colorizer {
                     if (index + 1 < characters.length) {
                         if (characters[index + 1] == 'r') {
                             specialColors.setLength(0);
-                        }
-                        else {
+                        } else {
                             specialColors.append(characters[index]);
                             specialColors.append(characters[index + 1]);
                         }
                         index++;
+                    } else {
+                        gradiented.append(colors[outIndex++]).append(specialColors).append(characters[index]);
                     }
-                    else gradiented.append(colors[outIndex++]).append(specialColors).append(characters[index]);
+                } else {
+                    gradiented.append(colors[outIndex++]).append(specialColors).append(characters[index]);
                 }
-                else gradiented.append(colors[outIndex++]).append(specialColors).append(characters[index]);
             }
-
             string = string.replace(matcher.group(0), gradiented.toString());
         }
         return string;
@@ -123,18 +116,15 @@ public class Colorizer {
     @NotNull
     public static String plainHex(@NotNull String str) {
         StringBuilder buffer = new StringBuilder(str);
-
         int index;
         while ((index = buffer.toString().indexOf(ChatColor.COLOR_CHAR + "x")) >= 0) {
             int count = 0;
             buffer.replace(index, index + 2, "#");
-
             for (int point = index + 1; count < 6; point += 1) {
                 buffer.deleteCharAt(point);
                 count++;
             }
         }
-
         return buffer.toString();
     }
 

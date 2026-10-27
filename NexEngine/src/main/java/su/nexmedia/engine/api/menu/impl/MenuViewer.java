@@ -8,6 +8,7 @@ public class MenuViewer {
     private final Player player;
 
     private int page;
+
     private int pages;
 
     public MenuViewer(@NotNull Player player) {

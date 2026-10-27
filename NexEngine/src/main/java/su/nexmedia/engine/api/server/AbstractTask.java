@@ -5,10 +5,13 @@ import su.nexmedia.engine.NexPlugin;
 
 public abstract class AbstractTask<P extends NexPlugin<P>> {
 
-    @NotNull protected final P plugin;
+    @NotNull
+    protected final P plugin;
 
-    protected int     taskId;
-    protected long    interval;
+    protected int taskId;
+
+    protected long interval;
+
     protected boolean async;
 
     public AbstractTask(@NotNull P plugin, int interval, boolean async) {
@@ -30,21 +33,24 @@ public abstract class AbstractTask<P extends NexPlugin<P>> {
     }
 
     public boolean start() {
-        if (this.taskId >= 0) return false;
-        if (this.interval <= 0L) return false;
-
+        if (this.taskId >= 0) {
+            return false;
+        }
+        if (this.interval <= 0L) {
+            return false;
+        }
         if (this.async) {
             this.taskId = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::action, 1L, interval).getTaskId();
-        }
-        else {
+        } else {
             this.taskId = plugin.getServer().getScheduler().runTaskTimer(this.plugin, this::action, 1L, interval).getTaskId();
         }
         return true;
     }
 
     public boolean stop() {
-        if (this.taskId < 0) return false;
-
+        if (this.taskId < 0) {
+            return false;
+        }
         this.plugin.getServer().getScheduler().cancelTask(this.taskId);
         this.taskId = -1;
         return true;

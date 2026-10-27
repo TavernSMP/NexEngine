@@ -6,18 +6,20 @@ import su.nexmedia.engine.NexPlugin;
 public class UniTask {
 
     private final NexPlugin<?> plugin;
+
     private final Runnable runnable;
-    private final long    interval;
+
+    private final long interval;
+
     private final boolean async;
 
-    private int     taskId;
+    private int taskId;
 
     public UniTask(@NotNull NexPlugin<?> plugin, @NotNull Runnable runnable, long interval, boolean async) {
         this.plugin = plugin;
         this.runnable = runnable;
         this.interval = interval;
         this.async = async;
-
         this.taskId = -1;
     }
 
@@ -32,21 +34,24 @@ public class UniTask {
     }
 
     public boolean start() {
-        if (this.taskId >= 0) return false;
-        if (this.interval <= 0L) return false;
-
+        if (this.taskId >= 0) {
+            return false;
+        }
+        if (this.interval <= 0L) {
+            return false;
+        }
         if (this.async) {
             this.taskId = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, runnable, 0L, interval).getTaskId();
-        }
-        else {
+        } else {
             this.taskId = plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, 0L, interval).getTaskId();
         }
         return true;
     }
 
     public boolean stop() {
-        if (this.taskId < 0) return false;
-
+        if (this.taskId < 0) {
+            return false;
+        }
         this.plugin.getServer().getScheduler().cancelTask(this.taskId);
         this.taskId = -1;
         return true;
@@ -57,8 +62,10 @@ public class UniTask {
         private final NexPlugin<?> plugin;
 
         private Runnable runnable;
-        private long     interval;
-        private boolean  async;
+
+        private long interval;
+
+        private boolean async;
 
         public Builder(@NotNull NexPlugin<?> plugin) {
             this.plugin = plugin;

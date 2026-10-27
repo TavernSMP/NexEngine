@@ -1,24 +1,28 @@
 package su.nexmedia.engine.api.data;
 
+import java.util.UUID;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.NexPlugin;
 
-import java.util.UUID;
-
 public abstract class AbstractUser<P extends NexPlugin<P>> {
 
     protected final P plugin;
+
     protected final UUID uuid;
 
     protected String name;
-    protected long   dateCreated;
-    protected long   lastOnline;
-    protected long   cachedUntil;
 
-    @Deprecated private boolean isRecent = false;
+    protected long dateCreated;
+
+    protected long lastOnline;
+
+    protected long cachedUntil;
+
+    @Deprecated
+    private boolean isRecent = false;
 
     public AbstractUser(@NotNull P plugin, @NotNull UUID uuid, @NotNull String name, long dateCreated, long lastOnline) {
         this.plugin = plugin;
@@ -30,11 +34,9 @@ public abstract class AbstractUser<P extends NexPlugin<P>> {
     }
 
     public void onLoad() {
-
     }
 
     public void onUnload() {
-
     }
 
     @SuppressWarnings("unchecked")

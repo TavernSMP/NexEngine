@@ -9,12 +9,16 @@ import su.nexmedia.engine.api.menu.click.ItemClick;
 public class MenuItem {
 
     protected Enum<?> type;
+
     protected ItemStack item;
+
     protected int priority;
+
     protected int[] slots;
 
     protected ItemOptions options;
-    protected ItemClick   click;
+
+    protected ItemClick click;
 
     public MenuItem(@NotNull ItemStack item) {
         this(MenuItemType.NONE, item);
@@ -24,17 +28,16 @@ public class MenuItem {
         this(MenuItemType.NONE, item, 0, slots);
     }
 
-    public MenuItem( @NotNull ItemStack item, int priority, @NotNull ItemOptions options, int... slots) {
+    public MenuItem(@NotNull ItemStack item, int priority, @NotNull ItemOptions options, int... slots) {
         this(MenuItemType.NONE, item, priority, options, slots);
     }
-
 
     public MenuItem(@NotNull Enum<?> type, @NotNull ItemStack item) {
         this(type, item, 0);
     }
 
     public MenuItem(@NotNull Enum<?> type, @NotNull ItemStack item, int priority) {
-        this(type, item, priority, new int[]{});
+        this(type, item, priority, new int[] {});
     }
 
     public MenuItem(@NotNull Enum<?> type, @NotNull ItemStack item, int priority, int... slots) {

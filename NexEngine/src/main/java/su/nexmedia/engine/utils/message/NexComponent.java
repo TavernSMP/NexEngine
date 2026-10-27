@@ -1,5 +1,6 @@
 package su.nexmedia.engine.utils.message;
 
+import java.util.List;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Item;
 import net.md_5.bungee.api.chat.hover.content.Text;
@@ -11,16 +12,16 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 
-import java.util.List;
-
 public class NexComponent {
 
     private final String text;
 
     public HoverEvent hoverEvent;
+
     public ClickEvent clickEvent;
 
     private String font;
+
     private String insertion;
 
     public NexComponent(@NotNull String text) {
@@ -62,24 +63,32 @@ public class NexComponent {
 
     @NotNull
     public NexComponent addClickEvent(@NotNull ClickEvent.Action action, @NotNull String value) {
-        return switch (action) {
-            case OPEN_URL -> this.openURL(value);
-            case OPEN_FILE, CHANGE_PAGE -> this;
-            case RUN_COMMAND -> this.runCommand(value);
-            case SUGGEST_COMMAND -> this.suggestCommand(value);
-            case COPY_TO_CLIPBOARD -> this.copyToClipboard(value);
+        return switch(action) {
+            case OPEN_URL ->
+                this.openURL(value);
+            case OPEN_FILE, CHANGE_PAGE ->
+                this;
+            case RUN_COMMAND ->
+                this.runCommand(value);
+            case SUGGEST_COMMAND ->
+                this.suggestCommand(value);
+            case COPY_TO_CLIPBOARD ->
+                this.copyToClipboard(value);
         };
     }
 
     @NotNull
     public NexComponent addHoverEvent(@NotNull HoverEvent.Action action, @NotNull String value) {
-        return switch (action) {
-            case SHOW_ITEM -> {
-                ItemStack item = ItemUtil.decompress(value);
-                yield this.showItem(item == null ? new ItemStack(Material.AIR) : item);
-            }
-            case SHOW_TEXT -> this.showText(value);
-            default -> this;
+        return switch(action) {
+            case SHOW_ITEM ->
+                {
+                    ItemStack item = ItemUtil.decompress(value);
+                    yield this.showItem(item == null ? new ItemStack(Material.AIR) : item);
+                }
+            case SHOW_TEXT ->
+                this.showText(value);
+            default ->
+                this;
         };
     }
 
@@ -148,10 +157,6 @@ public class NexComponent {
 
     @Override
     public String toString() {
-        return "NexComponent{" +
-            "text='" + text + '\'' +
-            ", hoverEvent=" + hoverEvent +
-            ", clickEvent=" + clickEvent +
-            '}';
+        return "NexComponent{" + "text='" + text + '\'' + ", hoverEvent=" + hoverEvent + ", clickEvent=" + clickEvent + '}';
     }
 }

@@ -1,27 +1,26 @@
 package su.nexmedia.engine.api.menu.item;
 
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-
 public class ItemOptions {
 
     private Predicate<MenuViewer> visibilityPolicy;
+
     private Predicate<MenuViewer> weakPolicy;
+
     private BiConsumer<MenuViewer, ItemStack> displayModifier;
 
     public ItemOptions() {
         this(null, null, null);
     }
 
-    public ItemOptions(@Nullable Predicate<MenuViewer> visibilityPolicy,
-                       @Nullable Predicate<MenuViewer> weakPolicy,
-                       @Nullable BiConsumer<MenuViewer, ItemStack> displayModifier) {
+    public ItemOptions(@Nullable Predicate<MenuViewer> visibilityPolicy, @Nullable Predicate<MenuViewer> weakPolicy, @Nullable BiConsumer<MenuViewer, ItemStack> displayModifier) {
         this.setVisibilityPolicy(visibilityPolicy);
         this.setWeakPolicy(weakPolicy);
         this.setDisplayModifier(displayModifier);
@@ -94,8 +93,7 @@ public class ItemOptions {
     public ItemOptions addDisplayModifier(@NotNull BiConsumer<MenuViewer, ItemStack> displayModifier) {
         if (this.displayModifier == null) {
             this.displayModifier = displayModifier;
-        }
-        else {
+        } else {
             this.displayModifier = this.displayModifier.andThen(displayModifier);
         }
         return this;

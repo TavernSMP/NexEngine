@@ -1,18 +1,19 @@
 package su.nexmedia.engine.api.command;
 
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.StringUtil;
 
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
 public class CommandFlag<T> {
 
     private final String name;
+
     private final Pattern pattern;
+
     private final Function<String, T> parser;
 
     public CommandFlag(@NotNull String name, @NotNull Function<String, T> parser) {

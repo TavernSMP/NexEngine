@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 public class LangKey {
 
     private final String path;
+
     private final String defaultText;
 
     public LangKey(@NotNull String path, @NotNull String defaultText) {

@@ -1,5 +1,7 @@
 package su.nexmedia.engine.command;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.NexPlugin;
@@ -9,13 +11,11 @@ import su.nexmedia.engine.command.list.HelpSubCommand;
 import su.nexmedia.engine.utils.ArrayUtil;
 import su.nexmedia.engine.utils.values.UniTask;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class CommandManager<P extends NexPlugin<P>> extends AbstractManager<P> {
 
     private Set<GeneralCommand<P>> commands;
-    private PluginMainCommand<P>   mainCommand;
+
+    private PluginMainCommand<P> mainCommand;
 
     public CommandManager(@NotNull P plugin) {
         super(plugin);
@@ -28,14 +28,11 @@ public class CommandManager<P extends NexPlugin<P>> extends AbstractManager<P> {
             this.plugin.error("Could not register plugin commands!");
             return;
         }
-
         // Create main plugin command and attach help sub-command as a default executor.
         this.mainCommand = new PluginMainCommand<>(this.plugin);
         this.mainCommand.addDefaultCommand(new HelpSubCommand<>(this.plugin));
-
         // Register child plugin sub-commands to the main plugin command.
         this.plugin.registerCommands(this.mainCommand);
-
         // Register main command as a bukkit command.
         this.registerCommand(this.mainCommand);
     }
@@ -61,9 +58,7 @@ public class CommandManager<P extends NexPlugin<P>> extends AbstractManager<P> {
 
     @Nullable
     public GeneralCommand<P> getCommand(@NotNull String alias) {
-        return this.getCommands().stream()
-            .filter(command -> ArrayUtil.contains(command.getAliases(), alias))
-            .findFirst().orElse(null);
+        return this.getCommands().stream().filter(command -> ArrayUtil.contains(command.getAliases(), alias)).findFirst().orElse(null);
     }
 
     public void registerCommand(@NotNull GeneralCommand<P> command) {

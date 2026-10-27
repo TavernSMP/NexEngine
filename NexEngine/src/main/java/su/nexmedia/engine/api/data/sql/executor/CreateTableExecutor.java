@@ -1,5 +1,9 @@
 package su.nexmedia.engine.api.data.sql.executor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.StorageType;
 import su.nexmedia.engine.api.data.connection.AbstractDataConnector;
@@ -8,14 +12,10 @@ import su.nexmedia.engine.api.data.sql.SQLExecutor;
 import su.nexmedia.engine.api.data.sql.SQLQueries;
 import su.nexmedia.engine.api.data.sql.column.ColumnFormer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public final class CreateTableExecutor extends SQLExecutor<Void> {
 
     private final StorageType storageType;
+
     private final List<SQLColumn> columns;
 
     private CreateTableExecutor(@NotNull String table, @NotNull StorageType storageType) {
@@ -44,22 +44,17 @@ public final class CreateTableExecutor extends SQLExecutor<Void> {
     @Override
     @NotNull
     public Void execute(@NotNull AbstractDataConnector connector) {
-        if (this.columns.isEmpty()) return null;
-
+        if (this.columns.isEmpty()) {
+            return null;
+        }
         String id = "`id` " + ColumnFormer.INTEGER.build(this.storageType, 11);
         if (this.storageType == StorageType.SQLITE) {
             id += " PRIMARY KEY AUTOINCREMENT";
-        }
-        else {
+        } else {
             id += " PRIMARY KEY AUTO_INCREMENT";
         }
-
-        String columns = id + "," + this.columns.stream()
-            .map(column -> column.getNameEscaped() + " " + column.formatType(this.storageType))
-            .collect(Collectors.joining(", "));
-
+        String columns = id + "," + this.columns.stream().map(column -> column.getNameEscaped() + " " + column.formatType(this.storageType)).collect(Collectors.joining(", "));
         String sql = "CREATE TABLE IF NOT EXISTS " + this.getTable() + "(" + columns + ");";
-
         SQLQueries.executeStatement(connector, sql);
         return null;
     }

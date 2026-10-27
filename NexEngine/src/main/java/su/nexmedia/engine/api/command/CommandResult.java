@@ -1,14 +1,14 @@
 package su.nexmedia.engine.api.command;
 
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.StringUtil;
 
-import java.util.Map;
-
 public class CommandResult {
 
     private final String label;
+
     private final Map<CommandFlag<?>, String> flags;
 
     private String[] args;
@@ -34,8 +34,9 @@ public class CommandResult {
 
     @NotNull
     public String getArg(int index, @NotNull String def) {
-        if (index >= this.length()) return def;
-
+        if (index >= this.length()) {
+            return def;
+        }
         return this.getArgs()[index];
     }
 
@@ -54,8 +55,9 @@ public class CommandResult {
     @Nullable
     public <T> T getFlag(@NotNull CommandFlag<T> flag) {
         String value = this.getFlags().get(flag);
-        if (value == null) return null;
-
+        if (value == null) {
+            return null;
+        }
         return flag.getParser().apply(value);
     }
 

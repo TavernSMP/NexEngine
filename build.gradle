@@ -1,0 +1,78 @@
+plugins {
+    id 'java'
+}
+
+group = 'su.nexmedia'
+version = '2.2.12-tavern.26.3.1'
+
+repositories {
+    if (file('D:/cache/.maven/repository').isDirectory()) {
+        maven { url = uri('D:/cache/.maven/repository') }
+    }
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url = 'https://repo.opencollab.dev/maven-snapshots/' }
+    maven { url = 'https://jitpack.io' }
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ['NexEngine/src/main/java']
+        resources.srcDirs = ['NexEngine/src/main/resources']
+    }
+    probe {
+        java.srcDirs = ['verification/probe']
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+    }
+}
+
+configurations.testImplementation.extendsFrom(configurations.compileOnly)
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT'
+    compileOnly 'com.zaxxer:HikariCP:5.0.1'
+    compileOnly 'it.unimi.dsi:fastutil:8.5.11'
+    compileOnly 'org.xerial:sqlite-jdbc:3.41.2.2'
+    compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
+    compileOnly('me.clip:placeholderapi:2.11.6') { transitive = false }
+    compileOnly('org.geysermc.floodgate:api:2.2.3-SNAPSHOT') { transitive = false }
+    testImplementation 'junit:junit:4.13.2'
+    probeCompileOnly 'io.papermc.paper:paper-api:26.3.build.223-stable'
+    probeCompileOnly files(providers.gradleProperty('excellentCratesJar').getOrElse('../../plugins.copy/ExcellentCrates.jar'))
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+    options.compilerArgs += ['-Xlint:unchecked', '-Xlint:cast']
+}
+
+processResources {
+    inputs.property('version', project.version)
+    filesMatching('plugin.yml') {
+        filter { line -> line.replace('${project.version}', project.version.toString()) }
+    }
+}
+
+jar {
+    archiveBaseName = 'NexEngine'
+    from('LICENSE') { into 'META-INF' }
+}
+
+test {
+    useJUnit()
+    systemProperty 'originalJar', providers.gradleProperty('originalJar').getOrElse('../../plugins.copy/NexEngine.jar')
+}
+
+tasks.register('probeJar', Jar) {
+    dependsOn probeClasses
+    archiveFileName = 'CratesStackProbe.jar'
+    destinationDirectory = layout.buildDirectory.dir('probe')
+    from sourceSets.probe.output
+    from('verification/probe.yml') { rename 'probe.yml', 'plugin.yml' }
+}

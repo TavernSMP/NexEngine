@@ -1,5 +1,9 @@
 package su.nexmedia.engine.api.command;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,14 +15,10 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.utils.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public abstract class GeneralCommand<P extends NexPlugin<P>> extends AbstractCommand<P> implements CommandExecutor, TabExecutor {
 
     private Command fallback;
+
     private AbstractCommand<P> defaultCommand;
 
     public GeneralCommand(@NotNull P plugin, @NotNull List<String> aliases) {
@@ -60,12 +60,14 @@ public abstract class GeneralCommand<P extends NexPlugin<P>> extends AbstractCom
 
     @NotNull
     public AbstractCommand<P> findChildren(@NotNull String[] args) {
-        AbstractCommand<P> command = this;//.defaultCommand;
+        //.defaultCommand;
+        AbstractCommand<P> command = this;
         int childCount = 0;
         while (args.length > childCount) {
             AbstractCommand<P> child = command.getChildren(args[childCount++]);
-            if (child == null) break;
-
+            if (child == null) {
+                break;
+            }
             command = child;
         }
         return command;
@@ -83,7 +85,6 @@ public abstract class GeneralCommand<P extends NexPlugin<P>> extends AbstractCom
         }
         return childCount;
     }*/
-
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         AbstractCommand<P> command = this.findChildren(args);
@@ -97,20 +98,18 @@ public abstract class GeneralCommand<P extends NexPlugin<P>> extends AbstractCom
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd,
-                                            @NotNull String label, String[] args) {
-
-        if (!(sender instanceof Player player) || args.length == 0) return Collections.emptyList();
-
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
+        if (!(sender instanceof Player player) || args.length == 0) {
+            return Collections.emptyList();
+        }
         AbstractCommand<P> command = this.findChildren(args);
-        if (!command.hasPermission(sender)) return Collections.emptyList();
-
+        if (!command.hasPermission(sender)) {
+            return Collections.emptyList();
+        }
         List<String> list = new ArrayList<>();
         if (!command.getChildrens().isEmpty()) {
-            command.getChildrens().stream().filter(child -> child.hasPermission(sender))
-                .forEach(child -> list.addAll(Arrays.asList(child.getAliases())));
-        }
-        else {
+            command.getChildrens().stream().filter(child -> child.hasPermission(sender)).forEach(child -> list.addAll(Arrays.asList(child.getAliases())));
+        } else {
             list.addAll(command.getTab(player, command.equals(this) ? (args.length) : (args.length - 1), args));
         }
         return StringUtil.getByPartialMatches(list, args[args.length - 1], 2);

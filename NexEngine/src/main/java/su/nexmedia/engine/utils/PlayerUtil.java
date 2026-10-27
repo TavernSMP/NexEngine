@@ -1,5 +1,8 @@
 package su.nexmedia.engine.utils;
 
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
@@ -16,10 +19,6 @@ import su.nexmedia.engine.config.EngineConfig;
 import su.nexmedia.engine.integration.VaultHook;
 import su.nexmedia.engine.utils.message.NexParser;
 
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 public class PlayerUtil {
 
     @NotNull
@@ -32,38 +31,33 @@ public class PlayerUtil {
         if (!EngineConfig.RESPECT_PLAYER_DISPLAYNAME.get()) {
             return Bukkit.getServer().getPlayer(nameOrNick);
         }
-
         Player found = Bukkit.getServer().getPlayerExact(nameOrNick);
         if (found != null) {
             return found;
         }
-
         String lowerName = nameOrNick.toLowerCase();
         int lowerLength = lowerName.length();
         int delta = Integer.MAX_VALUE;
-
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
             String nameReal = player.getName().toLowerCase(Locale.ENGLISH);
             String nameCustom = player.getDisplayName().toLowerCase();
-
             int length;
             if (nameReal.startsWith(lowerName)) {
                 length = player.getName().length();
-            }
-            else if (nameCustom.startsWith(lowerName)) {
+            } else if (nameCustom.startsWith(lowerName)) {
                 length = player.getDisplayName().length();
+            } else {
+                continue;
             }
-            else continue;
-
             int curDelta = Math.abs(length - lowerLength);
             if (curDelta < delta) {
                 found = player;
                 delta = curDelta;
             }
-
-            if (curDelta == 0) break;
+            if (curDelta == 0) {
+                break;
+            }
         }
-
         return found;
     }
 
@@ -145,9 +139,7 @@ public class PlayerUtil {
     }
 
     public static int countItem(@NotNull Player player, @NotNull Predicate<ItemStack> predicate) {
-        return Stream.of(player.getInventory().getContents())
-            .filter(item -> item != null && !item.getType().isAir() && predicate.test(item))
-            .mapToInt(ItemStack::getAmount).sum();
+        return Stream.of(player.getInventory().getContents()).filter(item -> item != null && !item.getType().isAir() && predicate.test(item)).mapToInt(ItemStack::getAmount).sum();
     }
 
     public static int countItem(@NotNull Player player, @NotNull ItemStack item) {
@@ -179,21 +171,21 @@ public class PlayerUtil {
     }
 
     public static boolean takeItem(@NotNull Player player, @NotNull Predicate<ItemStack> predicate, int amount) {
-        if (countItem(player, predicate) < amount) return false;
-
+        if (countItem(player, predicate) < amount) {
+            return false;
+        }
         int takenAmount = 0;
-
         Inventory inventory = player.getInventory();
         for (ItemStack itemHas : inventory.getContents()) {
-            if (itemHas == null || !predicate.test(itemHas)) continue;
-
+            if (itemHas == null || !predicate.test(itemHas)) {
+                continue;
+            }
             int hasAmount = itemHas.getAmount();
             if (takenAmount + hasAmount > amount) {
                 int diff = (takenAmount + hasAmount) - amount;
                 itemHas.setAmount(diff);
                 break;
             }
-
             itemHas.setAmount(0);
             if ((takenAmount += hasAmount) == amount) {
                 break;
@@ -207,18 +199,19 @@ public class PlayerUtil {
     }
 
     public static void addItem(@NotNull Player player, @NotNull ItemStack item2, int amount) {
-        if (amount <= 0 || item2.getType().isAir()) return;
-
+        if (amount <= 0 || item2.getType().isAir()) {
+            return;
+        }
         World world = player.getWorld();
         ItemStack item = new ItemStack(item2);
-
         int realAmount = Math.min(item.getMaxStackSize(), amount);
         item.setAmount(realAmount);
         player.getInventory().addItem(item).values().forEach(left -> {
             world.dropItem(player.getLocation(), left);
         });
-
         amount -= realAmount;
-        if (amount > 0) addItem(player, item2, amount);
+        if (amount > 0) {
+            addItem(player, item2, amount);
+        }
     }
 }

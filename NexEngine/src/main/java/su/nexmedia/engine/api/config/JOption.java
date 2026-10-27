@@ -1,5 +1,10 @@
 package su.nexmedia.engine.api.config;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,28 +12,34 @@ import su.nexmedia.engine.utils.TriFunction;
 import su.nexmedia.engine.utils.values.UniParticle;
 import su.nexmedia.engine.utils.values.UniSound;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
 public class JOption<T> {
 
-    public static final Reader<Boolean>      READER_BOOLEAN     = JYML::getBoolean;
-    public static final Reader<Integer>      READER_INT         = JYML::getInt;
-    public static final Reader<Double>       READER_DOUBLE      = JYML::getDouble;
-    public static final Reader<Long>         READER_LONG        = JYML::getLong;
-    public static final Reader<String>       READER_STRING      = JYML::getString;
-    public static final Reader<Set<String>>  READER_SET_STRING  = (cfg, path, def) -> cfg.getStringSet(path);
-    public static final Reader<List<String>> READER_LIST_STRING = (cfg, path, def) -> cfg.getStringList(path);
-    public static final Reader<ItemStack>    READER_ITEM        = JYML::getItem;
+    public static final Reader<Boolean> READER_BOOLEAN = JYML::getBoolean;
 
-    protected final String    path;
-    protected final T         defaultValue;
-    protected final String[]  description;
-    protected T         value;
+    public static final Reader<Integer> READER_INT = JYML::getInt;
+
+    public static final Reader<Double> READER_DOUBLE = JYML::getDouble;
+
+    public static final Reader<Long> READER_LONG = JYML::getLong;
+
+    public static final Reader<String> READER_STRING = JYML::getString;
+
+    public static final Reader<Set<String>> READER_SET_STRING = (cfg, path, def) -> cfg.getStringSet(path);
+
+    public static final Reader<List<String>> READER_LIST_STRING = (cfg, path, def) -> cfg.getStringList(path);
+
+    public static final Reader<ItemStack> READER_ITEM = JYML::getItem;
+
+    protected final String path;
+
+    protected final T defaultValue;
+
+    protected final String[] description;
+
+    protected T value;
+
     protected Writer<T> writer;
+
     protected Reader<T> reader;
 
     public JOption(@NotNull String path, @NotNull Reader<T> reader, @NotNull T defaultValue, @Nullable String... description) {
@@ -48,20 +59,12 @@ public class JOption<T> {
     }
 
     @NotNull
-    public static <T> JOption<T> create(@NotNull String path,
-                                        @NotNull Writer<T> writer,
-                                        @NotNull Reader<T> reader,
-                                        @NotNull T defaultValue,
-                                        @Nullable String... description) {
+    public static <T> JOption<T> create(@NotNull String path, @NotNull Writer<T> writer, @NotNull Reader<T> reader, @NotNull T defaultValue, @Nullable String... description) {
         return new JOption<>(path, writer, reader, defaultValue, description);
     }
 
     @NotNull
-    public static <T> JOption<T> create(@NotNull String path,
-                                        @NotNull Writer<T> writer,
-                                        @NotNull Reader<T> reader,
-                                        @NotNull Supplier<T> defaultValue,
-                                        @Nullable String... description) {
+    public static <T> JOption<T> create(@NotNull String path, @NotNull Writer<T> writer, @NotNull Reader<T> reader, @NotNull Supplier<T> defaultValue, @Nullable String... description) {
         return create(path, writer, reader, defaultValue.get(), description);
     }
 
@@ -127,88 +130,62 @@ public class JOption<T> {
 
     @NotNull
     public static <E extends Enum<E>> JOption<E> create(@NotNull String path, @NotNull Class<E> clazz, @NotNull E defaultValue, @Nullable String... description) {
-        return create(path, ((cfg, path1, def) -> cfg.getEnum(path1, clazz, defaultValue)), defaultValue, description)
-            .setWriter((cfg, path1, type) -> cfg.set(path1, type.name()));
+        return create(path, ((cfg, path1, def) -> cfg.getEnum(path1, clazz, defaultValue)), defaultValue, description).setWriter((cfg, path1, type) -> cfg.set(path1, type.name()));
     }
 
     @NotNull
-    public static <V> JOption<Set<V>> forSet(@NotNull String path, @NotNull Function<String, V> valFun,
-                                             @NotNull Supplier<Set<V>> defaultValue, @Nullable String... description) {
+    public static <V> JOption<Set<V>> forSet(@NotNull String path, @NotNull Function<String, V> valFun, @NotNull Supplier<Set<V>> defaultValue, @Nullable String... description) {
         return forSet(path, valFun, defaultValue.get(), description);
     }
 
     @NotNull
-    public static <V> JOption<Set<V>> forSet(@NotNull String path, @NotNull Function<String, V> valFun,
-                                             @NotNull Set<V> defaultValue, @Nullable String... description) {
-        return create(path,
-            (cfg, path1, def) -> cfg.getStringSet(path1).stream().map(valFun).filter(Objects::nonNull).collect(Collectors.toCollection(HashSet::new)),
-            defaultValue,
-            description);
+    public static <V> JOption<Set<V>> forSet(@NotNull String path, @NotNull Function<String, V> valFun, @NotNull Set<V> defaultValue, @Nullable String... description) {
+        return create(path, (cfg, path1, def) -> cfg.getStringSet(path1).stream().map(valFun).filter(Objects::nonNull).collect(Collectors.toCollection(HashSet::new)), defaultValue, description);
     }
 
     @NotNull
-    public static <K, V> JOption<Map<K, V>> forMap(@NotNull String path,
-                                                   @NotNull Function<String, K> keyFun,
-                                                   @NotNull TriFunction<JYML, String, String, V> valFun,
-                                                   @NotNull Supplier<Map<K, V>> defaultValue, @Nullable String... description) {
+    public static <K, V> JOption<Map<K, V>> forMap(@NotNull String path, @NotNull Function<String, K> keyFun, @NotNull TriFunction<JYML, String, String, V> valFun, @NotNull Supplier<Map<K, V>> defaultValue, @Nullable String... description) {
         return forMap(path, keyFun, valFun, defaultValue.get(), description);
     }
 
     @NotNull
-    public static <K, V> JOption<Map<K, V>> forMap(@NotNull String path,
-                                                   @NotNull Function<String, K> keyFun,
-                                                   @NotNull TriFunction<JYML, String, String, V> valFun,
-                                                   @NotNull Map<K, V> defaultValue, @Nullable String... description) {
+    public static <K, V> JOption<Map<K, V>> forMap(@NotNull String path, @NotNull Function<String, K> keyFun, @NotNull TriFunction<JYML, String, String, V> valFun, @NotNull Map<K, V> defaultValue, @Nullable String... description) {
         return forMap(path, keyFun, valFun, HashMap::new, defaultValue, description);
     }
 
     @NotNull
-    public static <K, V> JOption<TreeMap<K, V>> forTreeMap(@NotNull String path,
-                                                   @NotNull Function<String, K> keyFun,
-                                                   @NotNull TriFunction<JYML, String, String, V> valFun,
-                                                   @NotNull Supplier<TreeMap<K, V>> defaultValue, @Nullable String... description) {
+    public static <K, V> JOption<TreeMap<K, V>> forTreeMap(@NotNull String path, @NotNull Function<String, K> keyFun, @NotNull TriFunction<JYML, String, String, V> valFun, @NotNull Supplier<TreeMap<K, V>> defaultValue, @Nullable String... description) {
         return forTreeMap(path, keyFun, valFun, defaultValue.get(), description);
     }
 
     @NotNull
-    public static <K, V> JOption<TreeMap<K, V>> forTreeMap(@NotNull String path,
-                                                   @NotNull Function<String, K> keyFun,
-                                                   @NotNull TriFunction<JYML, String, String, V> valFun,
-                                                   @NotNull TreeMap<K, V> defaultValue, @Nullable String... description) {
+    public static <K, V> JOption<TreeMap<K, V>> forTreeMap(@NotNull String path, @NotNull Function<String, K> keyFun, @NotNull TriFunction<JYML, String, String, V> valFun, @NotNull TreeMap<K, V> defaultValue, @Nullable String... description) {
         return forMap(path, keyFun, valFun, TreeMap::new, defaultValue, description);
     }
 
     @NotNull
-    public static <K, V, M extends Map<K, V>> JOption<M> forMap(@NotNull String path,
-                                                    @NotNull Function<String, K> keyFun,
-                                                    @NotNull TriFunction<JYML, String, String, V> valFun,
-                                                    @NotNull Supplier<M> mapSupplier,
-                                                    @NotNull M defaultValue, @Nullable String... description) {
-        return create(path,
-            (cfg, path1, def) -> {
-                M map = mapSupplier.get();
-                for (String id : cfg.getSection(path1)) {
-                    K key = keyFun.apply(id);
-                    V val = valFun.apply(cfg, path1, id);
-                    if (key == null || val == null) continue;
-
-                    map.put(key, val);
+    public static <K, V, M extends Map<K, V>> JOption<M> forMap(@NotNull String path, @NotNull Function<String, K> keyFun, @NotNull TriFunction<JYML, String, String, V> valFun, @NotNull Supplier<M> mapSupplier, @NotNull M defaultValue, @Nullable String... description) {
+        return create(path, (cfg, path1, def) -> {
+            M map = mapSupplier.get();
+            for (String id : cfg.getSection(path1)) {
+                K key = keyFun.apply(id);
+                V val = valFun.apply(cfg, path1, id);
+                if (key == null || val == null) {
+                    continue;
                 }
-                return map;
-            },
-            defaultValue,
-            description);
+                map.put(key, val);
+            }
+            return map;
+        }, defaultValue, description);
     }
 
     @NotNull
-    public static <V> JOption<Map<String, V>> forMap(@NotNull String path, @NotNull TriFunction<JYML, String, String, V> function,
-                                                     @NotNull Supplier<Map<String, V>> defaultValue, @Nullable String... description) {
+    public static <V> JOption<Map<String, V>> forMap(@NotNull String path, @NotNull TriFunction<JYML, String, String, V> function, @NotNull Supplier<Map<String, V>> defaultValue, @Nullable String... description) {
         return forMap(path, String::toLowerCase, function, defaultValue.get(), description);
     }
 
     @NotNull
-    public static <V> JOption<Map<String, V>> forMap(@NotNull String path, @NotNull TriFunction<JYML, String, String, V> function,
-                                                     @NotNull Map<String, V> defaultValue, @Nullable String... description) {
+    public static <V> JOption<Map<String, V>> forMap(@NotNull String path, @NotNull TriFunction<JYML, String, String, V> function, @NotNull Map<String, V> defaultValue, @Nullable String... description) {
         return forMap(path, String::toLowerCase, function, defaultValue, description);
     }
 
@@ -226,8 +203,7 @@ public class JOption<T> {
     public void write(@NotNull JYML cfg) {
         if (this.getWriter() != null) {
             this.getWriter().write(cfg, this.getPath(), this.get());
-        }
-        else {
+        } else {
             cfg.set(this.getPath(), this.get());
         }
     }
@@ -254,8 +230,9 @@ public class JOption<T> {
     @NotNull
     @Deprecated
     public JOption<T> mapReader(@NotNull UnaryOperator<T> operator) {
-        if (this.reader == null) return this;
-
+        if (this.reader == null) {
+            return this;
+        }
         Reader<T> readerHas = this.reader;
         this.reader = (cfg, path1, def) -> operator.apply(readerHas.read(cfg, path1, def));
         return this;
@@ -288,7 +265,8 @@ public class JOption<T> {
 
     public interface Reader<T> {
 
-        @NotNull T read(@NotNull JYML cfg, @NotNull String path, @NotNull T def);
+        @NotNull
+        T read(@NotNull JYML cfg, @NotNull String path, @NotNull T def);
     }
 
     public interface Writer<T> {

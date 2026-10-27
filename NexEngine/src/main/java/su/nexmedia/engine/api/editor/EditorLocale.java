@@ -1,18 +1,20 @@
 package su.nexmedia.engine.api.editor;
 
+import java.util.Arrays;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.Colorizer;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class EditorLocale {
 
-    private final String       key;
-    private final String       name;
+    private final String key;
+
+    private final String name;
+
     private final List<String> lore;
 
     private String localizedName;
+
     private List<String> localizedLore;
 
     public EditorLocale(@NotNull String key, @NotNull String name, @NotNull List<String> lore) {

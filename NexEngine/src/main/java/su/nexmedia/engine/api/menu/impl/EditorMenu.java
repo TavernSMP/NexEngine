@@ -81,7 +81,6 @@ public class EditorMenu<P extends NexPlugin<P>, T> extends Menu<P> {
             meta.setLore(locale.getLocalizedLore());
             meta.addItemFlags(ItemFlag.values());
         });
-
         MenuItem menuItem = new MenuItem(item).setPriority(100).setSlots(slots);
         this.addItem(menuItem);
         return menuItem;

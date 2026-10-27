@@ -7,6 +7,7 @@ import su.nexmedia.engine.utils.random.Rnd;
 public final class UniDouble {
 
     private final double minInclusive;
+
     private final double maxInclusive;
 
     private UniDouble(double min, double max) {

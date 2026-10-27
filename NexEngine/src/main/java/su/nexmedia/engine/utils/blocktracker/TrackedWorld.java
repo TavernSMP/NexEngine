@@ -23,15 +23,17 @@ public class TrackedWorld {
 
     protected void add(@NotNull Block block) {
         TrackedChunk trackedChunk = this.getChunkOf(block);
-        if (trackedChunk == null) return;
-
+        if (trackedChunk == null) {
+            return;
+        }
         trackedChunk.add(block);
     }
 
     protected void remove(@NotNull Block block) {
         TrackedChunk trackedChunk = this.getChunkOf(block);
-        if (trackedChunk == null) return;
-
+        if (trackedChunk == null) {
+            return;
+        }
         trackedChunk.remove(block);
     }
 
@@ -49,8 +51,7 @@ public class TrackedWorld {
         PersistentDataContainer container = chunk.getPersistentDataContainer();
         if (trackedChunk.isEmpty()) {
             container.remove(PlayerBlockTracker.TRACKED_DATA_KEY);
-        }
-        else {
+        } else {
             trackedChunk.saveTo(container);
         }
     }

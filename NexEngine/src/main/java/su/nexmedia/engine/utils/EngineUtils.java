@@ -8,9 +8,11 @@ public class EngineUtils {
 
     public static final NexEngine ENGINE = NexEngine.getPlugin(NexEngine.class);
 
-    public static final String VAULT           = "Vault";
+    public static final String VAULT = "Vault";
+
     public static final String PLACEHOLDER_API = "PlaceholderAPI";
-    public static final String FLOODGATE       = "floodgate";
+
+    public static final String FLOODGATE = "floodgate";
 
     public static boolean hasPlugin(@NotNull String pluginName) {
         Plugin plugin = ENGINE.getPluginManager().getPlugin(pluginName);

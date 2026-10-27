@@ -1,5 +1,9 @@
 package su.nexmedia.engine.api.data;
 
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,14 +17,10 @@ import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.config.EngineConfig;
 import su.nexmedia.engine.utils.PlayerUtil;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-
 public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends AbstractUser<P>> extends AbstractManager<P> {
 
     private final UserDataHolder<P, U> dataHolder;
+
     private final Map<UUID, U> usersLoaded;
 
     public AbstractUserManager(@NotNull P plugin, @NotNull UserDataHolder<P, U> dataHolder) {
@@ -46,17 +46,19 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
     public void loadOnlineUsers() {
         this.plugin.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).forEach(id -> {
             U user = this.getUserData(id);
-            if (user != null) this.cachePermanent(user);
+            if (user != null) {
+                this.cachePermanent(user);
+            }
         });
     }
 
     @NotNull
     public final U getUserData(@NotNull Player player) {
         UUID uuid = player.getUniqueId();
-
         U user = this.getUserLoaded(uuid);
-        if (user != null) return user;
-
+        if (user != null) {
+            return user;
+        }
         if (PlayerUtil.isReal(player)) {
             user = this.getUserData(uuid);
             if (user != null) {
@@ -67,7 +69,6 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
                 return user;
             }
         }
-
         return this.createData(uuid, player.getName());
     }
 
@@ -80,18 +81,19 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
     @Nullable
     public final U getUserData(@NotNull String name) {
         Player player = PlayerUtil.getPlayer(name);
-        if (player != null) return this.getUserData(player);
-
+        if (player != null) {
+            return this.getUserData(player);
+        }
         U user = this.getUserLoaded(name);
-        if (user != null) return user;
-
+        if (user != null) {
+            return user;
+        }
         user = this.dataHolder.getData().getUser(name);
         if (user != null) {
             user.onLoad();
             //this.plugin.debug("Loaded by name from DB: " + user.getName());
             this.cacheTemporary(user);
         }
-
         return user;
     }
 
@@ -104,15 +106,15 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
     @Nullable
     public final U getUserData(@NotNull UUID uuid) {
         U user = this.getUserLoaded(uuid);
-        if (user != null) return user;
-
+        if (user != null) {
+            return user;
+        }
         user = this.dataHolder.getData().getUser(uuid);
         if (user != null) {
             user.onLoad();
             //this.plugin.debug("Loaded by UUID from DB: " + user.getName());
             this.cacheTemporary(user);
         }
-
         return user;
     }
 
@@ -128,32 +130,36 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
         U user = this.getUserLoaded(name);
         if (user != null) {
             consumer.accept(user);
+        } else {
+            this.getUserDataAsync(name).thenAccept(user2 -> this.plugin.runTask(task -> consumer.accept(user2)));
         }
-        else this.getUserDataAsync(name).thenAccept(user2 -> this.plugin.runTask(task -> consumer.accept(user2)));
     }
 
     public void getUserDataAndPerform(@NotNull UUID uuid, Consumer<U> consumer) {
         U user = this.getUserLoaded(uuid);
         if (user != null) {
             consumer.accept(user);
+        } else {
+            this.getUserDataAsync(uuid).thenAccept(user2 -> this.plugin.runTask(task -> consumer.accept(user2)));
         }
-        else this.getUserDataAsync(uuid).thenAccept(user2 -> this.plugin.runTask(task -> consumer.accept(user2)));
     }
 
     public void getUserDataAndPerformAsync(@NotNull String name, Consumer<U> consumer) {
         U user = this.getUserLoaded(name);
         if (user != null) {
             consumer.accept(user);
+        } else {
+            this.getUserDataAsync(name).thenAccept(consumer);
         }
-        else this.getUserDataAsync(name).thenAccept(consumer);
     }
 
     public void getUserDataAndPerformAsync(@NotNull UUID uuid, Consumer<U> consumer) {
         U user = this.getUserLoaded(uuid);
         if (user != null) {
             consumer.accept(user);
+        } else {
+            this.getUserDataAsync(uuid).thenAccept(consumer);
         }
-        else this.getUserDataAsync(uuid).thenAccept(consumer);
     }
 
     public final void unloadUser(@NotNull Player player) {
@@ -162,8 +168,9 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
 
     public final void unloadUser(@NotNull UUID uuid) {
         U user = this.getUsersLoadedMap().get(uuid);
-        if (user == null) return;
-
+        if (user == null) {
+            return;
+        }
         this.unloadUser(user);
     }
 
@@ -203,7 +210,6 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
             }
             return false;
         });
-
         return this.usersLoaded;
     }
 
@@ -219,8 +225,7 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
 
     @Nullable
     public U getUserLoaded(@NotNull String name) {
-        return this.getUsersLoaded().stream().filter(user -> user.getName().equalsIgnoreCase(name))
-            .findFirst().orElse(null);
+        return this.getUsersLoaded().stream().filter(user -> user.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
     public boolean isUserLoaded(@NotNull Player player) {
@@ -259,8 +264,9 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onUserLogin(AsyncPlayerPreLoginEvent event) {
-            if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
-
+            if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+                return;
+            }
             UUID uuid = event.getUniqueId();
             U user;
             if (!isUserExists(uuid)) {
@@ -268,9 +274,9 @@ public abstract class AbstractUserManager<P extends NexPlugin<P>, U extends Abst
                 user.setRecentlyCreated(true);
                 dataHolder.getData().addUser(user);
                 plugin.info("Created new user data for: '" + uuid + "'");
+            } else {
+                user = getUserData(uuid);
             }
-            else user = getUserData(uuid);
-
             if (user != null) {
                 cachePermanent(user);
             }

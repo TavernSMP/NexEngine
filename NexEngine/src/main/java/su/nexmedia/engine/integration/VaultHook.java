@@ -1,5 +1,9 @@
 package su.nexmedia.engine.integration;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -15,17 +19,15 @@ import su.nexmedia.engine.NexEngine;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nexmedia.engine.utils.EngineUtils;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public final class VaultHook extends AbstractListener<NexEngine> {
 
-    private static VaultHook  instance;
-    private static Economy    economy;
+    private static VaultHook instance;
+
+    private static Economy economy;
+
     private static Permission permission;
-    private static Chat       chat;
+
+    private static Chat chat;
 
     private VaultHook(@NotNull NexEngine plugin) {
         super(plugin);
@@ -44,7 +46,6 @@ public final class VaultHook extends AbstractListener<NexEngine> {
     public static void shutdown() {
         if (instance != null) {
             instance.unregisterListeners();
-
             economy = null;
             permission = null;
             chat = null;
@@ -53,24 +54,27 @@ public final class VaultHook extends AbstractListener<NexEngine> {
 
     private void setPermission() {
         RegisteredServiceProvider<Permission> rsp = plugin.getServer().getServicesManager().getRegistration(Permission.class);
-        if (rsp == null) return;
-
+        if (rsp == null) {
+            return;
+        }
         permission = rsp.getProvider();
         this.plugin.info("Successfully hooked with " + permission.getName() + " permissions");
     }
 
     private void setEconomy() {
         RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) return;
-
+        if (rsp == null) {
+            return;
+        }
         economy = rsp.getProvider();
         this.plugin.info("Successfully hooked with " + economy.getName() + " economy");
     }
 
     private void setChat() {
         RegisteredServiceProvider<Chat> rsp = plugin.getServer().getServicesManager().getRegistration(Chat.class);
-        if (rsp == null) return;
-
+        if (rsp == null) {
+            return;
+        }
         chat = rsp.getProvider();
         this.plugin.info("Successfully hooked with " + chat.getName() + " chat");
     }
@@ -78,14 +82,11 @@ public final class VaultHook extends AbstractListener<NexEngine> {
     @EventHandler(priority = EventPriority.NORMAL)
     public void onServiceRegisterEvent(ServiceRegisterEvent event) {
         Object provider = event.getProvider().getProvider();
-
         if (provider instanceof Economy) {
             this.setEconomy();
-        }
-        else if (provider instanceof Permission) {
+        } else if (provider instanceof Permission) {
             this.setPermission();
-        }
-        else if (provider instanceof Chat) {
+        } else if (provider instanceof Chat) {
             this.setChat();
         }
     }
@@ -124,19 +125,22 @@ public final class VaultHook extends AbstractListener<NexEngine> {
 
     @NotNull
     public static String getPermissionGroup(@NotNull Player player) {
-        if (!hasPermissions() || !permission.hasGroupSupport()) return "";
-
+        if (!hasPermissions() || !permission.hasGroupSupport()) {
+            return "";
+        }
         String group = permission.getPrimaryGroup(player);
         return group == null ? "" : group.toLowerCase();
     }
 
     @NotNull
     public static Set<String> getPermissionGroups(@NotNull Player player) {
-        if (!hasPermissions() || !permission.hasGroupSupport()) return Collections.emptySet();
-
+        if (!hasPermissions() || !permission.hasGroupSupport()) {
+            return Collections.emptySet();
+        }
         String[] groups = permission.getPlayerGroups(player);
-        if (groups == null) groups = new String[] {getPermissionGroup(player)};
-
+        if (groups == null) {
+            groups = new String[] { getPermissionGroup(player) };
+        }
         return Stream.of(groups).map(String::toLowerCase).collect(Collectors.toSet());
     }
 

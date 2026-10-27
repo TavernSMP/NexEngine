@@ -1,16 +1,15 @@
 package su.nexmedia.engine.utils;
 
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.config.EngineConfig;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CollectionsUtil {
 
@@ -38,8 +37,9 @@ public class CollectionsUtil {
     public static List<String> playerNames(@Nullable Player viewer, boolean includeCustom) {
         Set<String> names = new HashSet<>();
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (viewer != null && !viewer.canSee(player)) continue;
-
+            if (viewer != null && !viewer.canSee(player)) {
+                continue;
+            }
             names.add(player.getName());
             if (includeCustom && EngineConfig.RESPECT_PLAYER_DISPLAYNAME.get()) {
                 names.add(Colorizer.strip(player.getDisplayName()));
@@ -56,8 +56,9 @@ public class CollectionsUtil {
     @NotNull
     public static <T> List<List<T>> split(@NotNull List<T> list, int targetSize) {
         List<List<T>> lists = new ArrayList<>();
-        if (targetSize <= 0) return lists;
-
+        if (targetSize <= 0) {
+            return lists;
+        }
         for (int index = 0; index < list.size(); index += targetSize) {
             lists.add(list.subList(index, Math.min(index + targetSize, list.size())));
         }
@@ -76,8 +77,7 @@ public class CollectionsUtil {
 
     @NotNull
     public static <K, V extends Comparable<? super V>> Map<K, V> sort(@NotNull Map<K, V> map, @NotNull Comparator<Map.Entry<K, V>> comparator) {
-        return new LinkedList<>(map.entrySet()).stream().sorted(comparator)
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (old, nev) -> nev, LinkedHashMap::new));
+        return new LinkedList<>(map.entrySet()).stream().sorted(comparator).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (old, nev) -> nev, LinkedHashMap::new));
     }
 
     @NotNull
@@ -113,7 +113,8 @@ public class CollectionsUtil {
     @NotNull
     private static <T extends Enum<T>> T shifted(@NotNull Enum<T> numeration, int shift, @Nullable Predicate<T> predicate) {
         T[] values = numeration.getDeclaringClass().getEnumConstants();
-        return shifted(values, numeration/*.ordinal()*/, shift, predicate);
+        return shifted(values, numeration, /*.ordinal()*/
+        shift, predicate);
     }
 
     @NotNull
@@ -122,11 +123,12 @@ public class CollectionsUtil {
             T source = origin.getDeclaringClass().cast(origin);
             List<T> filtered = new ArrayList<>(Arrays.asList(values));
             filtered.removeIf(num -> !predicate.test(num) && num != source);
-
             int currentIndex = filtered.indexOf(source);
             //List<T> filtered = Stream.of(values).filter(predicate).toList();
-            if (currentIndex < 0 | filtered.isEmpty()) return source;//values[currentIndex];
-
+            //values[currentIndex];
+            if (currentIndex < 0 | filtered.isEmpty()) {
+                return source;
+            }
             return shifted(filtered, currentIndex, shift);
         }
         return shifted(values, origin.ordinal(), shift);
@@ -141,8 +143,9 @@ public class CollectionsUtil {
     @NotNull
     public static <T> T shifted(@NotNull List<T> values, int currentIndex, int shift) {
         int index = currentIndex + shift;
-        if (index < 0) return values.get(values.size() - 1);
-
+        if (index < 0) {
+            return values.get(values.size() - 1);
+        }
         return values.get(index >= values.size() ? 0 : index);
     }
 }

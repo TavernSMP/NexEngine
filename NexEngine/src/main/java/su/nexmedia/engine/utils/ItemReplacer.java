@@ -1,6 +1,10 @@
 package su.nexmedia.engine.utils;
 
 import com.google.common.base.Splitter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -11,21 +15,20 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-
 public class ItemReplacer {
 
     private final ItemStack item;
+
     private final ItemMeta meta;
+
     private final PlaceholderMap placeholderMap;
 
     private String displayName;
+
     private String lore;
 
     private boolean trimLore;
+
     private boolean hideFlags;
 
     public ItemReplacer(@NotNull ItemStack item) {
@@ -61,17 +64,15 @@ public class ItemReplacer {
     }
 
     public void writeMeta() {
-        if (!this.hasMeta()) return;
-
+        if (!this.hasMeta()) {
+            return;
+        }
         this.replace(this.placeholderMap.replacer());
-
         this.meta.setDisplayName(this.getDisplayName());
         this.meta.setLore(this.packTrimmedLore());
-
         if (this.isHideFlags()) {
             this.meta.addItemFlags(ItemFlag.values());
         }
-
         if (this.hasItem()) {
             this.item.setItemMeta(this.meta);
         }
@@ -159,7 +160,6 @@ public class ItemReplacer {
         if (this.getDisplayName() != null) {
             this.setDisplayName(replacer.apply(this.getDisplayName()));
         }
-
         if (this.getLore() != null) {
             this.setLore(replacer.apply(this.getLore()));
         }
@@ -168,24 +168,27 @@ public class ItemReplacer {
 
     @NotNull
     public ItemReplacer replacePlaceholderAPI(@NotNull Player player) {
-        if (!EngineUtils.hasPlaceholderAPI()) return this;
-
+        if (!EngineUtils.hasPlaceholderAPI()) {
+            return this;
+        }
         this.replace(str -> PlaceholderAPI.setPlaceholders(player, str));
         return this;
     }
 
     @NotNull
     public ItemReplacer replaceLoreExact(@NotNull String placeholder, @NotNull List<String> replacer) {
-        if (this.getLore() == null) return this;
-
+        if (this.getLore() == null) {
+            return this;
+        }
         this.setLore(StringUtil.replaceInList(this.packLore(), placeholder, replacer));
         return this;
     }
 
     @NotNull
     public ItemReplacer replaceLoreTrail(@NotNull String placeholder, @NotNull List<String> replacer) {
-        if (this.getLore() == null) return this;
-
+        if (this.getLore() == null) {
+            return this;
+        }
         List<String> loreReplaced = new ArrayList<>();
         for (String lineHas : this.packLore()) {
             if (lineHas.contains(placeholder)) {
@@ -202,8 +205,9 @@ public class ItemReplacer {
 
     @NotNull
     public List<String> packLore() {
-        if (this.getLore() == null) return new ArrayList<>();
-
+        if (this.getLore() == null) {
+            return new ArrayList<>();
+        }
         return Splitter.on("\n").splitToList(this.getLore());
     }
 

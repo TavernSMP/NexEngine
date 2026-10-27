@@ -1,5 +1,8 @@
 package su.nexmedia.engine.api.command;
 
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -13,23 +16,27 @@ import su.nexmedia.engine.lang.EngineLang;
 import su.nexmedia.engine.utils.Placeholders;
 import su.nexmedia.engine.utils.regex.TimedMatcher;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 public abstract class AbstractCommand<P extends NexPlugin<P>> implements Placeholder {
 
-    protected final P                               plugin;
+    protected final P plugin;
+
     protected final Map<String, AbstractCommand<P>> childrens;
-    protected final Set<CommandFlag<?>>             commandFlags;
+
+    protected final Set<CommandFlag<?>> commandFlags;
+
     protected final PlaceholderMap placeholderMap;
 
     protected AbstractCommand<P> parent;
-    protected String[]           aliases;
-    protected String             permission;
-    protected String             usage;
-    protected String             description;
-    protected boolean            playerOnly;
+
+    protected String[] aliases;
+
+    protected String permission;
+
+    protected String usage;
+
+    protected String description;
+
+    protected boolean playerOnly;
 
     public AbstractCommand(@NotNull P plugin, @NotNull List<String> aliases) {
         this(plugin, aliases.toArray(new String[0]));
@@ -57,11 +64,7 @@ public abstract class AbstractCommand<P extends NexPlugin<P>> implements Placeho
         this.permission = permission;
         this.childrens = new TreeMap<>();
         this.commandFlags = new HashSet<>();
-        this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.COMMAND_DESCRIPTION, this::getDescription)
-            .add(Placeholders.COMMAND_USAGE, this::getUsage)
-            .add(Placeholders.COMMAND_LABEL, this::getLabelFull);
-
+        this.placeholderMap = new PlaceholderMap().add(Placeholders.COMMAND_DESCRIPTION, this::getDescription).add(Placeholders.COMMAND_USAGE, this::getUsage).add(Placeholders.COMMAND_LABEL, this::getLabelFull);
     }
 
     @Override
@@ -86,13 +89,11 @@ public abstract class AbstractCommand<P extends NexPlugin<P>> implements Placeho
             this.errorPermission(sender);
             return;
         }
-
         CommandResult result = new CommandResult(label, args, new HashMap<>());
         String argLine = String.join(" ", args);
         for (CommandFlag<?> flag : this.getFlags()) {
             String name = flag.getName();
             Pattern pattern = flag.getPattern();
-
             TimedMatcher matcher = TimedMatcher.create(pattern, argLine, 100);
             matcher.setDebug(true);
             if (matcher.find()) {
@@ -101,13 +102,13 @@ public abstract class AbstractCommand<P extends NexPlugin<P>> implements Placeho
             }
         }
         result.setArgs(argLine.isEmpty() ? new String[0] : argLine.trim().split(" "));
-
         this.onExecute(sender, result);
     }
 
     public final void addChildren(@NotNull AbstractCommand<P> children) {
-        if (children.getParent() != null) return;
-
+        if (children.getParent() != null) {
+            return;
+        }
         Stream.of(children.getAliases()).forEach(alias -> {
             this.childrens.put(alias, children);
         });
@@ -119,7 +120,9 @@ public abstract class AbstractCommand<P extends NexPlugin<P>> implements Placeho
     }
 
     public final void addFlag(@NotNull CommandFlag<?>... flags) {
-        for (CommandFlag<?> flag : flags) this.addFlag(flag);
+        for (CommandFlag<?> flag : flags) {
+            this.addFlag(flag);
+        }
     }
 
     public final void addFlag(@NotNull CommandFlag<?> flag) {

@@ -11,7 +11,9 @@ import su.nexmedia.engine.utils.values.UniInt;
 public class InputWrapper {
 
     private final String text;
+
     private final String textRaw;
+
     private final String textColored;
 
     public InputWrapper(@NotNull AsyncPlayerChatEvent e) {

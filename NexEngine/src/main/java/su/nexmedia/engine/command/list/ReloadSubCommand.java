@@ -15,7 +15,7 @@ public class ReloadSubCommand<P extends NexPlugin<P>> extends AbstractCommand<P>
     }
 
     public ReloadSubCommand(@NotNull P plugin, @NotNull String permission) {
-        super(plugin, new String[]{"reload"}, permission);
+        super(plugin, new String[] { "reload" }, permission);
         this.setDescription(plugin.getMessage(EngineLang.COMMAND_RELOAD_DESC));
     }
 

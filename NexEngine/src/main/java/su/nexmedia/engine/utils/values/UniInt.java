@@ -7,16 +7,17 @@ import su.nexmedia.engine.utils.random.Rnd;
 public final class UniInt {
 
     private final int minInclusive;
+
     private final int maxInclusive;
 
-    private UniInt(int var0, int var1) {
-        this.minInclusive = var0;
-        this.maxInclusive = var1;
+    private UniInt(int minInclusive, int maxInclusive) {
+        this.minInclusive = minInclusive;
+        this.maxInclusive = maxInclusive;
     }
 
     @NotNull
-    public static UniInt of(int var0, int var1) {
-        return new UniInt(var0, var1);
+    public static UniInt of(int minInclusive, int maxInclusive) {
+        return new UniInt(minInclusive, maxInclusive);
     }
 
     @NotNull

@@ -1,16 +1,15 @@
 package su.nexmedia.engine.api.data.sql.executor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.connection.AbstractDataConnector;
 import su.nexmedia.engine.api.data.sql.SQLCondition;
 import su.nexmedia.engine.api.data.sql.SQLExecutor;
 import su.nexmedia.engine.api.data.sql.SQLQueries;
 import su.nexmedia.engine.api.data.sql.SQLValue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public final class DeleteQueryExecutor extends SQLExecutor<Void> {
 
@@ -41,15 +40,12 @@ public final class DeleteQueryExecutor extends SQLExecutor<Void> {
     @Override
     @NotNull
     public Void execute(@NotNull AbstractDataConnector connector) {
-        if (this.wheres.isEmpty()) return null;
-
-        String whereCols = this.wheres.stream()
-            .map(where -> where.getValue().getColumn().getNameEscaped() + " " + where.getType().getOperator() + " ?")
-            .collect(Collectors.joining(" AND "));
+        if (this.wheres.isEmpty()) {
+            return null;
+        }
+        String whereCols = this.wheres.stream().map(where -> where.getValue().getColumn().getNameEscaped() + " " + where.getType().getOperator() + " ?").collect(Collectors.joining(" AND "));
         String sql = "DELETE FROM " + this.getTable() + (whereCols.isEmpty() ? "" : " WHERE " + whereCols);
-
         List<String> whereVals = this.wheres.stream().map(SQLCondition::getValue).map(SQLValue::getValue).toList();
-
         SQLQueries.executeStatement(connector, sql, whereVals);
         return null;
     }

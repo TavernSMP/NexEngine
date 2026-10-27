@@ -1,5 +1,6 @@
 package su.nexmedia.engine.editor;
 
+import java.util.HashSet;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,8 +14,6 @@ import su.nexmedia.engine.api.editor.InputWrapper;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.StringUtil;
-
-import java.util.HashSet;
 
 public class EditorListener extends AbstractListener<NexEngine> {
 
@@ -30,15 +29,13 @@ public class EditorListener extends AbstractListener<NexEngine> {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChatText(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-
         InputHandler handler = EditorManager.getInputHandler(player);
-        if (handler == null) return;
-
+        if (handler == null) {
+            return;
+        }
         event.getRecipients().clear();
         event.setCancelled(true);
-
         InputWrapper wrapper = new InputWrapper(event);
-
         this.plugin.runTask(task -> {
             if (wrapper.getTextRaw().equalsIgnoreCase(EditorManager.EXIT) || handler.handle(wrapper)) {
                 EditorManager.endEdit(player);
@@ -49,12 +46,11 @@ public class EditorListener extends AbstractListener<NexEngine> {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChatCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-
         InputHandler handler = EditorManager.getInputHandler(player);
-        if (handler == null) return;
-
+        if (handler == null) {
+            return;
+        }
         event.setCancelled(true);
-
         String raw = event.getMessage();
         String text = Colorizer.apply(raw.substring(1));
         if (text.startsWith(EditorManager.VALUES)) {
@@ -64,10 +60,8 @@ public class EditorListener extends AbstractListener<NexEngine> {
             EditorManager.displayValues(player, auto, page);
             return;
         }
-
         AsyncPlayerChatEvent chatEvent = new AsyncPlayerChatEvent(true, player, text, new HashSet<>());
         InputWrapper wrapper = new InputWrapper(chatEvent);
-
         this.plugin.runTask(task -> {
             if (wrapper.getTextRaw().equalsIgnoreCase(EditorManager.EXIT) || handler.handle(wrapper)) {
                 EditorManager.endEdit(player);
